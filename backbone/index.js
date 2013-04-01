@@ -1,5 +1,7 @@
 'use strict';
 
+// TODO: bring sanity to the initialization code.
+
 var ImageDetailsView = Backbone.View.extend({
     template: Handlebars.compile($('#body-content-template').html()),
     events: {
