@@ -3,3 +3,10 @@ Ideas about how to not get stuck in a ball of spaghetti code.
 Keep UI separate. Really. Have it in a separate module ('ui'), and have it
 expose just the interface you need. Then implement that interface. Iterate
 in the browser console and distill to the ui module.
+
+**Use an object capability model.**
+Automate: I think it is statically possible to verify that a JavaScript
+function with "use strict" does not capture any globals in its closure (I
+think that JSLint and other tools already do this if you turn off all
+globals).
+This also will be good for being accountable about performance.

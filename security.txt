@@ -1,0 +1,275 @@
+% Security
+
+XSS attacks are poorly named. There are modes of XSS attack that have
+nothing to do with operating across sites. Saying "XSS injection" gets a
+bit closer to the real issue, which is external input getting interpreted
+as code in your application, or generally other scripts running on the site
+(that don't represent your interest) which do things that you don't want
+them to.
+
+What can an attacker do if they get some script into your page?
+- Can request additional scripts from any server in the world by inserting
+  script tags and such.
+- Can view the document and see everything the user can see.
+- Can make requests of your server with no way to detect that they didn't
+  come from your application.
+- An attacker has control over the display and can request information from
+  the user.
+- An attacker can send information to servers anywhere in the world.
+
+The browser does not prevent any of these. Web standards require these
+weaknesses. If your browser does not have these vulnerabilities then it is
+not standards compliant.
+
+XSS attaches were invented in 1995. We have made no fundamental progress
+except a baby step in December 2009.
+
+%% Why is there XSS?
+
+The web stack is too complicated.
+- Too many languages, each with its own encoding, quoting, commenting, and
+  escaping conventions. (HTTP, HTML, CSS, URL, JavaScript, etc.)
+- Each can be nested inside the other.
+- Browsers do heroic things to make sense of malformed content.
+Template based web frameworks are optimized for XSS injection.
+The JavaScript global object gives every scrap of script the same set of
+powerful capabilities.
+As bad as it is at security, the browser is a vast improvement over
+everything else. The browser does distinguish between the interests of the
+user and the interests of the site. The browser failed to anticipate that
+there could be additional interests.
+- The mashup problem: a mashup is the combining of programs representing
+  multiple interests.
+- The browser confuses those interests.
+- An advertiser on a page gets the same privileges as an Ajax library or
+  analytics files, which is the same as the main application, which is the
+  same as any XSS code that falls into the page.
+- Advertising is a self-inflicted XSS attack.
+
+The security aspect is one of the most important parts of strict mode.
+
+JavaScript pass by reference is crucial for security.
+
+function do_it(inputs, callback) {
+    ...
+    callback(result);
+}
+This has nice security properties: do_it has no way to access any state
+inside callback. i.e. you can give do_it a way to do something useful for
+me, but without giving away what I'm doing. Also, due to lexical scoping,
+callback can't access anything in do_it that is not explicitly passed to
+it.
+do_it(my_inputs, function (result) {
+    my_object.blah = result;
+});
+function storer(obj, name) {
+    return function (result) {
+        obj[name] = result;
+    };
+}
+do_it(my_inputs, storer(my_object, 'blah'));
+function storer_maker(obj) {
+    return function (name) {
+        return function (result) {
+            obj[name] = result;
+        };
+    };
+}
+my_storer = storer_make(my_object);
+do_it(my_inputs, my_storer('blah'));
+But do_it could stash away the callback and call it when I don't want it
+to.
+function once(func) {
+    return function () {
+        var f = func;
+        func = null;
+        return f.apply(this, arguments);
+    };
+}
+do_it(my_inputs, once(storer(my_object, 'blah')));
+Notice how we can exert control over what do_it can do without touching it.
+function revoker(func) {
+    return {
+        revocable: function () {
+            return func.apply(this, arguments);
+        },
+        revoke: function () {
+            func = null;
+        }
+    };
+}
+
+Information Hiding. Need to know basis.
+David Parnas: On the Criteria to Be Used in Decomposing Systems into
+Modules. (1972)
+
+A reference is a capability. Now we need to talk about:
+Capability Hiding. Need to do basis.
+
+Three ways to obtain a reference in an object-capability security system.
+1. By creation. If a function creates an object, it gets a reference to
+that object.
+2. By construction. An object may be endowed by its constructor with
+references.
+3. By introduction. A has a reference to B and C, which do not have
+references to each other. A can give B a reference to C, with which B will
+then obtain the *capability* to interact with C.
+
+If references can only be obtained in these three ways, then you *may* have
+a safe system. If references can be obtained in any other way, then you do
+not have a safe system.
+
+This is a general approach called "object-capability security model".
+
+%% <http://www.youtube.com/watch?v=zKuFu19LgZA>
+
+It's not just white hats vs. black hats. You can't just punt security to a
+white hat. Security is everyone's job.
+
+Changing purpose and scope of software leads to insecure systems. Security
+properties need to be reexamined in the context of new or evolving
+missions. Example: the web started as just a document delivery system, but
+now it is an application platform; these have very different security
+properties.
+
+Intending to do the right thing is not enough.
+
+Deterrence is not effective. You can't punish an invisible attacker, or
+bot, or script; intimidation doesn't work. Prevention is the only way.
+
+Kerckhoff's Principle: The design of a system should not require secrecy;
+and compromise of the system should not inconvenience the correspondents.
+E.g. You should assume that the enemy will find out how the encryption
+machine works, but that shouldn't compromise the security of the system.
+Following this to its logical conclusion, you should publish how the system
+works so that the enemy knows how it works, to be sure that this principle
+is actually being upheld (if you aren't confident in being able to do this,
+then you aren't safe in the first place).
+Corollary: There is no security in obscurity. The more secrets you have,
+the harder they are to keep.
+
+One Time Pad: proven to be impossible to break.
+- They key must always remain secret.
+- The key must be at least as long as the plain text.
+- Xor key with plain text to obtain ciphertext.
+- The key must be perfectly random.
+- A key must never be used more than once.
+
+Cryptography is not security. It is a tool we use to build secure systems.
+
+One thing we can learn from cryptographers is that security must be
+factored into every decision. Cryptographers, when designing a protocol,
+have to consider the security implications of *every link* in the chain;
+it's an end-to-end thing; a single weak link compromises the whole system.
+
+One of the biggest causes of insecurity is "we'll go back and make it
+secure later". The reason is that you can't add security, just as you can't
+add reliability. You can only remove insecurity or remove unreliability.
+
+The Impossible is not Possible. You shouldn't be relying on anything that
+can't be done in order to make a system secure, because it can't be done.
+You shouldn't be trying to do things that are not effective. Things that
+are not effective are ineffective. I.e. it's bad to do "well, we can't stop
+them, but we can sure slow them down"; the effort of putting in speed bumps
+could be put towards doing something that is actually effective.
+
+Don't prohibit what you can't prevent. Bad guys can exploit what you can't
+prevent.
+
+False security is worse than no security. Unnecessary expense and confusion
+of risk.
+
+The browser platform is horribly insecure, but it is still better than
+everything else because it doesn't rely on a "blame the victim" security
+model. I.e. other platforms typically ask the user questions about what the
+program should be able to do (and the user has really no way to answer
+those questions correctly).
+
+The browser gets right the separation of whose interest the program
+represents: the browser knows that the program represents the interest of
+the site, *not of the user or owner of the computer*. Every other system
+assumes that the program represents the interests of the user or owner of
+the computer, and hence gets their privileges.
+
+Browsers still don't recognize that there can be other interests in the
+page, such as advertisers or other scripts.
+
+There is no way to prevent *any another scrap of script* on the page from
+doing whatever it wants with your application.
+
+Confusion of Interests: The browser distinguishes between the interests of
+the user and the interests of the site. It did not anticipate that multiple
+interests might be represented.
+
+The Principle of Least Authority: Any unit of software should be given
+just the *capabilities* it needs to do its work, and no more.
+
+You can give Guest object a Facet object that has a reference to a Powerful
+object. A Facet object wraps a reference to the Powerful object and
+restricts the *capabilities* it provides.
+
+References are not revokable, but you can add an extra level of
+indirection (another object, an Agency object) to the Facet object that
+lets you "turn it off" or otherwise effectively revoke the capabilities it
+grants.
+
+Facets:
+- Very expressive.
+- Easy to construct.
+- Lightweight. (in JavaScript, just a function).
+- Attenuation: power reduction.
+- Revocation.
+- Notification.
+- Delegation.
+- The best OO patterns are also capability patterns.
+
+**When trying to design a system and the interfaces and APIs, looking at it
+from a capabilities perspective will usually lead to the right design**.
+Good systems are also secure systems.
+
+Attenuation is your friend:
+- Facets reduce the power of dangerous objects.
+- Most code should not be given direct access to innerHTML or
+  document.write()
+- Instead of trying to guess if a piece of code can do something bad, give
+  it safe capabilities instead.
+- **Capabilities can aid in API design.**
+
+Note to me: I should really design my APIs around this, and having code
+that gets passed in its dependencies (via .
+
+**In JavaScript, the closure-as-object pattern is the way to get this kind
+of security.**
+(in ES5, you can use the Meta-Object API to further improve the number and
+kinds of things you can do)
+
+Confusion causes bugs. Confusion aids the enemy. Bugs are a manifestation
+of confusion.
+With great complexity comes great confusion.
+
+Never trust a machine that isn't under your absolute control. Don't get
+more intimate than sharing JSON payloads.
+Never trust the browser! You must filter and validate everything that you
+get from the browser. Everything has to be encoded (e.g. escaped) right
+depending on where it is going to go (into a stylesheet, into an HTML
+paragraph, into a script, into a URL, etc.).
+
+
+Example XSS attach:
+
+http://yoursite.com/<script>...</script>
+
+<html><body>
+<p>404 File not found:
+<script>...</script>
+</p></body></html>
+
+If you don't escape it, then the script runs on your site.
+The attacker's script runs with the authority of your site. It can see your
+cookies, your localStorage, everything.
+The bad design here is that something that is safe in URL position is not
+safe in HTML position. So this escaping *has* to be coded.
+
+
+Inconvenience is not security. Identity is not security. Taint ain't
+security. Intrusion detection is not security.

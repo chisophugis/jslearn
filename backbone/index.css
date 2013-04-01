@@ -1,0 +1,18 @@
+#nav {
+    width: 220px;
+    float: left;
+}
+
+#body-content {
+    margin-left: 220px;
+}
+
+#body-content img {
+    display: block;
+}
+#body-content textarea {
+    display: block;
+}
+#body-content label {
+    display: block;
+}

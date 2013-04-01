@@ -1,0 +1,450 @@
+
+// .width and .height measure only the content, but not the border, margin,
+// or padding.
+box-sizing: content-box; // default
+// .width and .height include the content, border, and padding, but not the
+// margin.
+box-sizing: border-box;
+Paul Irish even goes so far as to suggest to use border-box for everything:
+<http://paulirish.com/2012/box-sizing-border-box-ftw/>.
+
+
+The CSS `transform` property seems immensely powerful. Especially if used
+in combination with transitions or animations.
+
+% Reflow and repaint
+
+Reflow happens when dimensions change that cause the render tree to have to
+be recalculated.
+Repaint happens when parts of the screen need to be updated (reflows always
+cause repaints; but repaints (such as just changing a background color)
+don't necessarily trigger a reflow).
+How expensive a reflow or repaint is depends on how much gets invalidated.
+
+display: none; // reflow and repaint
+visibility: hidden; // just repaint, since dimensions stay intact
+However, visibility: hidden still causes the browser to have to recompute
+the layout when you modify the element (e.g. add children), but with
+display: none, the browser doesn't have to relayout since the node doesn't
+enter into the render tree computation.
+
+Browsers optimize reflows by batching changes. However, if you access
+computed style information, the browser needs to give you the up to date
+value and compute the reflow on the spot, which thwarts this optimization.
+
+One of the issues is one of API design, in that setting styles and getting
+computed style information has a synchronous API, which forces this kind of
+batching for performance. The API could be much more performant if it were
+asynchronous or actually exposed the batching.
+
+
+<http://www.css3maker.com/> appears to have a lot of cool examples to mess
+around with in order to explore the CSS3 capabilities.
+<http://www.css3maker.com/blog/category/web-gallery> has lots of external
+links to similar things, and other useful stuff.
+
+Widths are inputs and heights are outputs (generally) when laying out the
+rendering tree. The parent gets its own width input, then tells each of its
+children to fit themselves in this width; each of the children then return
+to the parent what their height will be, and the parent computes it's
+height based on that and returns it. The rendering tree basically computes
+where each rectangle needs to be positioned on the screen (and it has to
+use CSS properties to determine this). Once that is constructed, it builds
+a display list and paints the list from back to front with a 2D graphics
+API.
+
+
+A containing block. For normal elements it's the nearest block-level
+ancestor. For absolutely positioned elements, it's the nearest relatively
+or absolutely positioned element, or the viewport if there is no such
+element.
+
+
+outline is like border but it doesn't occupy any space (border does).
+
+.code-keyword {
+/*
+    border-bottom-width: 1px;
+    border-bottom-style: dashed;
+    border-bottom-color: #f00;
+*/
+    border-bottom: 1px dashed #f00;
+}
+
+
+There are three ways to specify a stylesheet:
+
+1. (preferred)
+    <head>
+    ...
+    <link href="index.css" rel="stylesheet" type="text/css">
+    ...
+    </head>
+
+2.
+    <style>
+    rules...
+    </style>
+
+3.
+    <img style="display: none;" />
+
+Media queries:
+@import url(/style.css) screen and (min-width:800px) and (max-width:1280px);
+@media handheld and (min-width:20em) {
+  ⋮ one or more rule sets…
+}
+/* comma acts as "or"*/
+@import url(/style.css) screen and (color), projection and (color);
+
+% CSS Syntax
+
+Comment:
+    /* A comment. */
+(non-nesting)
+
+Statements:
+    @import url(base.css); /* "at-rule" */
+    /* Rule set. */
+    h2 {
+        color: #666;
+        font-weight: bold;
+    }
+
+At-rules:
+    /* Semicolon-delimited. */
+    @import url(base.css);
+    /* Requires a block enclosed in curly braces. */
+    @media print {
+        body {
+            font-size: 12pt;
+        }
+    }
+
+Rule set:
+    /* selector ("," selector)* "{" declaration* "}" */
+    h2 {
+        color: #666; /* a single declaration */
+        font-weight: bold;
+    }
+
+(this is equivalent:
+    h2 {
+        color: #666;
+    }
+    h2 {
+        font-weight: bold;
+    }
+)
+
+Declarations:
+    /* property-name ":" value */
+    font-weight: bold;
+
+Strings can be enclosed in double or single quotes:
+ol#breadcrumbs:before {
+  content: "You are \"here\": ";
+}
+html {
+  font-family: 'Grey\'s Bold',serif;
+}
+
+There is a functional notation for URL's:
+#example {
+  background-image: url(images/bg.gif);
+}
+if necessary, it can be a quoted string. Certain characters in an unquoted
+URL need to be escaped. (relative URL's in stylesheets are relative to the
+stylesheet, not the HTML document that links to the stylesheet)
+
+The default value for a property is called the "initial value" and is
+specified in the CSS standard, although user-agent stylesheets usually
+deviate from it.
+
+Shorthand notations:
+
+Shorthand for box properties:
+    margin: 1em 2em 3em 4em;
+    /* is equivalent to: */
+    margin-top: 1em;
+    margin-right: 2em;
+    margin-bottom: 3em;
+    margin-left: 4em;
+the way to remember this is with the mnemonic TRouBLe (Top, Right, Bottom,
+Left). If fewer than 4 values are specified, then they are still assigned
+in TRouBLe order, and any unassigned side gets the value of the opposite
+side. If only one value is specified (e.g. `margin: 4em`), then all four
+properties are assigned to that value.
+This form of shorthand is used for:
+    margin, padding, border-width, border-color, border-style
+
+Shorthands for other properties:
+e.g.
+    background: #fff url(bg.png) no-repeat fixed right top;
+    /* equivalent to */
+    background-color: #fff;
+    background-image: url(bg.png);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: right top;
+These don't all follow the same pattern, just the same behavior.
+
+In general, any of the can be omitted, in which case they take on their
+initial value. They are not left unassigned, so you can't combine the
+shorthand with the standard forms, e.g.
+
+    background-color: #fff;
+    background: url(bg.png); /* Also sets initial value
+                                background-color: transparent */
+This can confuse someone reading the code.
+
+Identifiers:
+Can contain [a-zA-Z0-9_], or -. But can't start with number or - then
+number. Identifiers can contain escaped characters.
+
+Escapes:
+Backslash followed by 1-6 hex digits. E.g. \a <-> newline. Additionally, if
+it is followed by a whitespace character, the escape will gobble it up. A
+chevron character is \bb. To get "»back", you need "\bb back" (it gobbles the
+space afterwards). Alternatively, you can use the full 6 digits and
+to "\0000bbback". If you want to get "» back", then you need to do
+"\bb  back". Notice that the space-gobbling is unconditional so you also
+need to do "\0000bb  back" (two spaces).
+
+Also, to style a class "»back" e.g.
+.\0000bb back { display:none; }
+.\bb back { display:none; }
+
+(this is just asking for an XSS problems)
+
+% The Cascade
+
+This is how CSS decides which property value should be assigned to an
+element:
+
+1. For a given property, find all declarations that apply to a specific
+element.
+    If there is only one, then use that one, else go to step 2 to tie-break
+2. Importance and Origin
+    Declarations marked with `!important` are called important
+    declarations, and ones that aren't are called normal declarations.
+    Declarations are sorted in the following order form lowest to highest
+    priority:
+    1. user agent declarations (from user agent style sheets)
+    2. normal declarations in user style sheets (set up in user preferences)
+    3. normal declarations in author style sheets (the regular stylesheets
+    linked to/in the page)
+    4. important declarations in author style sheets
+    5. important declarations in user style sheets
+    If this determines a single highest priority declaration, then use that
+    one, else go to step 3 to tie-break
+3. Selector Specificity
+    1. If one declaration is from a `style` attribute (e.g. set in
+    JavaScript or written inline), then it has the highest specificity. If
+    none then go to step 2
+    2. Count the number of id selectors. If there is a tie or all have
+    none, then to go step 3
+    3. Count the number class selectors (.foo), attribute selectors
+    ([type="submit"]), and pseudo-classes (:hover). The declaration with
+    the highest total has the highest specificity. If there is a tie or
+    none have any, then go to step 4
+    4. Count the element-type selectors (e.g. `div`) and pseudo-elements
+    (e.g. ::first-letter). The declaration with the highest total wins.
+    If this determines a single highest priority declaration, then use that
+    one, else go to step 4 to tie-break
+4. Source order
+    Determined by location of the <link> or @import that imports them or
+    <style>, in document order.
+
+Elements inherit certain properties that have been applied to their
+parents in the absence of having the property specified for them.
+This only happens for some properties, like font-size. It is really an
+aspect of the DOM and not of CSS per se. You can also explicitly set some
+properties to the value `inherit`, which effectively puts the option of
+inheriting higher up the priority list (allowing it to override other
+options instead of acting as a default fallback). For example, to override
+the default user-agent blue color of links and instead have them inherit
+the color, use:
+    p {
+        color: #000;
+    }
+    p a:link {
+        color: inherit;
+    }
+
+
+% Containing Block
+
+When we specify the positions or dimensions of element boxes, we're doing
+so relative to what's known as the *containing block*. For the root
+element, the containing block is the viewport.
+
+If the `position` property of an element is `static` (the default) or
+`relative`, then the containing block is formed by the edge of the content
+box of the nearest ancestor whose `display` property is one of:
+    block, inline-block, list-item, run-in (in block formatting context),
+    table, table-cell
+
+If the value of the position property is `absolute`, then the containing
+block is the nearest positioned ancestor. i.e. the nearest ancestor whose
+`position` property is one of `absolute`, `fixed`, or `relative`. The
+containing block is formed by the padding edge of that ancestor.
+
+If the value of the position property is `fixed`, then the containing block
+is the viewport.
+
+% Normal document flow
+
+(static or relative position, float: none)
+
+In block formatting context, boxes are laid out vertically, starting at the
+top. Elements with `display: block|list-item|table|run-in` (run-in in
+certain circumstances) participate in block formatting contexts. Such
+elements are called "block-level elements".
+A block-level element with display other than `table` will generate a
+"principle box" block, which must contain either just block boxes or just
+inline boxes as children. If it contains a mixture, then all the inline
+boxes will get wrapped in anonymous block boxes (which inherit their
+properties from the containing box).
+
+The left outer edge of each block box touches the left edge of its
+containing block (in ltr environment).
+
+Anonymous inline boxes will be generated e.g. around the text nodes
+adjacent to the <em> in:
+<p>Foo bar <em>baz</em> qux</p>
+In an inline formatting context, boxes are laid out horizontally starting
+at the top of the containing block. Horizontal margins, padding, and
+borders can exist between the boxes, but vertical margins are ignored.
+Dimensions (width/height) can't be specified for inline boxes.
+Inline boxes get put into line boxes, possibly splitting long inline boxes
+at line breaks.
+
+An element with `display: list-item` generates a principal box just like
+any other block box, but it also generates an additional box for the list
+marker.
+
+A replaced element is any element whose appearance and dimensions are
+defined by some external resource, such as <img> and form inputs like
+<button>, <textarea>, etc. Other elements are referred to as non-replaced
+elements. Replaced elements can have *intrinsic dimensions* which determine
+their size if no explicit sizing is specified, or the aspect ratio
+determining width/height if only the other is specified.
+
+There are three positioning schemes for horizontal/vertical positioning:
+- normal flow (relative and static (default))
+    - An element with `position: relative` is laid out as usual (i.e., like
+      `position: static`), and then the rendered box is shifted vertically
+      (top/bottom properties) or horizontally (left/right properties). It
+      does not interfere with the flow; it just silently moves out of the
+      way. Setting `left: 20px` means "shift the left edge 20px to the
+      right" (evidently it's not very useful to specify both left and
+      right). The shift can be negative too. Same goes for top/bottom.
+      A relatively positioned box counts as "postioned", which means it
+      will become the containing box block for any absolutely positioned
+      descendants (just set `position: relative` without touching
+      left/right/top/bottom).
+- floating
+    - Has a `float` property other than `none`. It can be either `left` or
+      `right` (or `inherit`).
+    - Non-floated content will flow along the side opposite the specified
+      float direction, e.g. `float: left` will cause the flow to go to its
+      right.
+    - The left/right margin edge of the floated block touches the padding
+      edge of the containing block, or the margin edge of another floated
+      element.
+    - Line boxes next to a floated block are shortened to make room for the
+      float.
+    - A containing block will not expand to accomodate a floating child box
+      unless the containing block is also floating or has its `overflow`
+      property set to something other than `visible`
+    - The `clear` property allows forcing and element start below any
+      floated elements in that block-formatting context. Setting `clear:
+      left` will cause the element to start below any left-floated boxes
+      (and analogously for `right`).  The value `both` clears on both
+      sides. This clearing is notionally done by increasing the top margin
+      of the element until it is free of the float, so you can't space it
+      from the float by setting its top margin; instead, you can either set
+      the top padding, or set the bottom margin of the float.,
+- absolute positioning (fixed and absolute)
+    - An element which is absolutely positioned is completely removed from
+      the document flow and doesn't affect subsequent elements. It is
+      positioned with respect to its containing block. It also establishes
+      a new containing block for its children.
+    - Setting left/right/top/bottom in conjunction with width/height
+      determine the positioning and size. E.g. if you omit width/height,
+      but specify `left: 20px; right: 25px`, then it will be positioned as
+      such and be 45px less wide than its containing block.
+    - In general, an absolutely positioned element will overlap other
+      content unless you explicitly make room for it by setting margins or
+      something. If multple absolutely positioned boxes overlap, then their
+      stacking context determines what is displayed.
+    - This can also be used to have elements completely off-screen.
+    - `position: fixed` is just like `position: absolute` except that the
+      containing block is always the viewport.
+
+The box's stack level determines its position on the z axis. The stack
+level can be specified with the z-index property. Setting `z-index: auto`
+will cause the box to have the same stack level as its parent, and doesn't
+create a new stacking context. Explicitly setting z-index to an integer
+specifies an explicit stack level and causes the box to create a new
+stacking context. A stacking context has 7 layers (from bottom to top):
+1. The background and borders of the element that establishes the stacking
+   context.
+2. The stacking contexts of descendants with negative stack levels.
+    3. block-level descendants in the normal flow
+    4. floated descendants and their contents
+    5. inline-level descendants in the normal flow
+6. Positioned descendants with `z-index: auto` or `z-index: 0` (the
+   difference between those two is whether they create a new stacking context
+   for themeselves)
+7. The stacking contexts of descendants with positive stack levels.
+
+Boxes within a stacking context can't render between two boxes in another
+stacking context.
+
+<http://reference.sitepoint.com/css/concepts>
+
+
+Might serve as a useful example:
+http://hay.github.com/stapes/
+
+
+
+FIRST ITERATION:
+Use a simple textarea(+ node component) to bootstrap. Just be naive and
+load the whole file in. Then follow your nose and add useful features and
+dogfood it. Get something working immediately and iterate.
+Literally I'm thinking of a single <textarea> with a Save button. And an
+<input type="text"> where you can put a filename, and a Load button. Kind
+of like mixjs.
+
+
+
+
+
+
+
+
+http://coding.smashingmagazine.com/2007/07/27/css-specificity-things-you-should-know/
+http://net.tutsplus.com/tutorials/html-css-techniques/the-30-css-selectors-you-must-memorize/
+
+
+https://www.webkit.org/blog/114/webcore-rendering-i-the-basics/
+https://github.com/WebKit/webkit
+
+Looks good:
+http://www.barelyfitz.com/screencast/html-training/css/positioning/
+
+Maybe:
+http://css.maxdesign.com.au/index.htm
+http://www.htmldog.com/guides/
+
+http://marijnhaverbeke.nl/blog/#cm-internals
+
+
+
+% Random stuff
+
+/* and others: */
+cursor: crosshair

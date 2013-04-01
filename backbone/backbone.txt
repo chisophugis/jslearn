@@ -1,0 +1,1 @@
+view.$(selector) is equivalent to $(view.el).find(selector)

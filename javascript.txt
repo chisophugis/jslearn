@@ -1,0 +1,1021 @@
+So, in JavaScript, you basically have:
+
+- Basic key(string)-value mappings from strings to values.
+
+% Object
+
+Object.prototype.constructor.prototype.constructor
+
+you can use reserved words in the syntax as keys and properties
+var a = {function: 'foo'};
+a.function = 'bar';
+
+getters and setters (don't use unless it really allows making a large API
+expressiveness improvement)
+a = {
+get celsius() { return 3;}
+set celsius(val) { this.celsius = val; }
+}
+
+var obj = {a:'foo',b:'bar'};
+// gets only the own, enumerable keys.
+Object.keys(obj).sort().forEach(function (k) {
+  console.log(k);
+});
+
+// Key operator for prototypal inheritance.
+Object.create(prototype [, propertiesObj])
+
+Use Object.create(null) to actually create a proper "hash table". This
+creates an object with a null prototype, so it doesn't inherit any
+properties. UGH: but __proto__ *still* gets in the way! (and it looks like
+it is going to be standardized!). The solution is to append '%' (or
+something else) to any string that starts with '__proto__' before putting
+it into the map (this does induce extra memory traffic, unfortunately...).
+NEED to write a simple StringMap class to encapsulate the intent of a
+string map, and then use that everywhere.
+
+TODO: write a "stringmap" for expressing intent.
+TODO: write a function to replace instanceof
+
+%% Meta Object API
+Together with Object.create(null), this allows creating "clean objects"
+free of cruft and with precise control over what shows up where.
+
+Use with discretion:
+Object.getPrototypeOf();
+<http://ejohn.org/blog/objectgetprototypeof/>:
+can define your own instanceOf:
+function instanceOf(object, constructor) {
+  while (object != null) {
+    if (object == constructor.prototype)
+      return true;
+    object = Object.getPrototypeOf(object);
+  }
+  return false;
+}
+instanceOf("test", String);
+instanceOf(true, Boolean);
+
+as a sort of "super":
+function SomeConstructor() {
+  Object.getPrototypeOf(this).method('foo')
+}
+
+Control over attributes of properties of objects:
+
+Object.defineProperty(obj, 'propName', propDescriptor);
+If the property already exists, then this will notionally do an "update"
+operation on the property descriptor with the provided keys. Even if the
+property is not configurable, you can update it to the same values that it
+already has without error.
+
+propDescriptor has the following keys:
+attrs for both:
+  enumerable [false] -- boolean, whether it shows up in for-in, Object.keys()
+  configurable [false] -- boolean, can't delete the property, can't change to
+                           different kind of property. Basically, this
+                           controls being able to "update" the descriptor
+                           to a new value. Even if it is not configurable,
+                           a property can still be changed from
+                           writable:true to writable:false, but not
+                           vice-versa.
+Two kinds of properties:
+- data properties
+  attrs:
+    value [undefined] -- the value
+    writable [false] -- boolean, whether the value can be changes
+    (configurable controls whether the *descriptor* can be changed
+    (including the property being deleted from the object))
+- accessor properties -- use getters/setters
+  attrs:
+    get [undefined] -- function () { ... return value; }
+    set [undefined] -- function (value) { ... }
+
+Object.defineProperties(obj, {foo: descr1, bar: descr2});
+equivalent to:
+Object.defineProperty(obj, 'foo', descr1);
+Object.defineProperty(obj, 'bar', descr2);
+
+Object.getOwnPropertyDescriptor(obj, 'propName');
+returns the property descriptor for the property.
+
+Object.getOwnPropertyNames(obj) --> list of all (enumerable or not) own
+                                    property names.
+
+var obj = {
+  get foo() { return 5; },
+  set foo(val) { this.val = val; }
+};
+Object.getOwnPropertyDescriptor(obj, 'foo') --> {
+  configurable: true,
+  enumerable: true,
+  get: function foo() { return 5; },
+  set: function foo(val) { this.val = val; }
+}
+obj.foo = 'silently ignored';
+obj.foo --> 5
+Object.defineProperty(obj, 'foo', {value: 'configurable was true!'})
+obj.foo --> 'configurable was true!'
+
+var o = Object.create(Object.prototype);
+Object.getOwnPropertyDescriptor(o, 'foo') --> undefined
+Object.defineProperty(o, 'foo', {
+  value: 'non-writable can still be deleted if configurable',
+  writable: false,
+  configurable:true
+});
+Object.getOwnPropertyDescriptor(o, 'foo') --> {
+  value: "can writable be deleted?",
+  writable: false,
+  enumerable: false,
+  configurable: true
+}
+delete o.foo --> true
+Object.getOwnPropertyDescriptor(o, 'foo') --> undefined
+
+In strict mode, attempting to delete a non-configurable property will throw
+a TypeError.
+
+Prevent new properties being added.
+Object.preventExtensions(obj);
+Object.isExtensible(obj);
+Prevents extensions, and marks all existing properties as non-configurable.
+Object.seal(obj);
+Object.isSealed(obj);
+Seals the object, and marks all existing properties non-writable.
+Object.freeze(obj);
+Object.isFrozen(obj);
+
+Object.isFrozen(Object.preventExtensions(Object.create(null))) --> true
+
+// Object.preventExtensions "sets a bit" which prevents extensions.
+// freezing and sealing don't "have a bit"; they are preventExtensions +
+// certain predicates being true for all properties.
+function test(n) {
+  var o = Object.create(null);
+  for (var i = 0; i != n; ++i)
+    o['foo' + i] = i;
+  Object.preventExtensions(o);
+  var beginMillis = Date.now();
+  Object.isFrozen(o); // goes through every property.
+  var elapsedMillis = Date.now() - beginMillis;
+  return elapsedMillis;
+}
+
+
+%%% Equivalent example
+
+var obj = {foo: bar};
+
+var obj = Object.create(Object.prototype);
+Object.defineProperty(obj, 'foo', {
+  value: bar,
+  writable: true,
+  enumerable: true,
+  configurable: true
+});
+
+
+
+
+
+
+- Typed Arrays
+
+% Array (dynamically resizing array)
+  - .push(el [, ...]) -> Number (the new length of the array)
+  - .pop() -> last element, removes last element
+  - .join(' ') join array of strings.
+  - .reverse() (in place)
+  - .concat(otherArr [,...])
+  - Literal syntax [5, 6]
+
+forEach and friends (every, some, map, etc.) call their callback with the
+index and the array itself. (they also take a second argument which allows
+you to specify the "this" to be used for the function, but that's rarely
+needed).
+// visit adjacent pairs
+arr.forEach(function (element, i, array /* === arr */) {
+  if (i === 0) {
+    return;
+  }
+  f(array[i-1], element /* === array[i] */)
+})
+
+Indices can be negative and then count from the end of the array:
+.indexOf(val [, fromIndex])
+.lastIndexOf(val [, fromIndex])
+.slice(beginIndex [, endIndex])
+.splice(index, howMany [, el1, el2, ...])
+  - basically does arr[index:index+howMany] = [el1, el2, ...]
+  - returns the removed element (if howMany is 1) or an array of the
+    removed elements (if howMany > 1)
+
+Array.isArray(obj)
+
+
+
+
+% String
+  - .charCodeAt()
+  - .split()
+  - 'foo'.charAt(0) === 'f' (returns '' for out of range)
+  - 'foo'.slice(1, 3) === 'oo' (truncates indices that are out of range)
+  - 'foo: bar'.indexOf(':') --> 3
+  - 'foo: bar'.indexOf('fdafda') --> -1
+  - 'foo'.indexOf('o', startAt)
+  - '   foo '.trim()
+
+- 32-bit integers.
+  - parseInt(),...
+- Doubles.
+
+
+- Booleans `true`, `false`.
+- Regexes.
+
+  'foo'.search(/o/) --> 1 (similar to indexOf)
+  /cat/.test("concatenate") --> true
+  /foo/i --> case insensitive
+  'no'.match(/yes/) --> null
+  '... yes'.match(/y./) --> ['ye']
+  '... yes'.match(/y.(.)/) --> ['yes', 's']
+
+  var parenthesized = prompt("Tell me something", "").match(/\((.*)\)/);
+  if (parenthesized != null)
+    print("You parenthesized '", parenthesized[1], "'");
+
+  'Borobudur'.replace(/[ou]/g, 'a') --> 'Barabadar'
+  'Borobudur'.replace(/[ou]/, 'a') --> 'Barobudur'
+
+  var names = "Picasso, Pablo\nGauguin, Paul\nVan Gogh, Vincent";
+  print(names.replace(/([\w ]+), ([\w ]+)/g, "$2 $1"));
+
+  function replacer(match, p1, p2, p3, offset, string) {
+    return [p1, p2, p3].join(' - ');
+  }
+  newString = "abc12345#$*%".replace(/([^\d]*)(\d*)([^\w]*)/, replacer);
+
+  function escapeHTML(text) {
+    var replacements = {"<": "&lt;", ">": "&gt;",
+                        "&": "&amp;", "\"": "&quot;"};
+    return text.replace(/[<>&"]/g, function(character) {
+      return replacements[character];
+    });
+  }
+
+  var badWords = ["ape", "monkey", "simian", "gorilla", "evolution"];
+  var pattern = new RegExp(badWords.join("|"), "i");
+
+% Function
+
+Function.prototype.bind(thisArg, [arg1, ...])
+useful pattern: this.method.bind(this)
+
+
+
+
+
+- Closures
+
+% Date
+new Date(1992,0,9) // there are other optional args for hours, minutes, etc.
+get Unix time millis: Date.now() (pre-ES5: new Date().getTime())
+for high-resolution timestamp: window.performance.now() (floating point millis)
+function extractDate(paragraph) {
+  function numberAt(start, length) {
+    return Number(paragraph.slice(start, start + length));
+  }
+  return new Date(numberAt(11, 4), numberAt(8, 2) - 1,
+                  numberAt(5, 2));
+}
+
+use Number(), String(), Boolean() to cast to those types. e.g.
+Number(true). Casting to String with String will call the toString method
+of the object.
+
+- Custom data types:
+
+  var FooDataType = (function FooDataTypeIIFE() {
+    function FooDataType() {
+    }
+
+    FooDataType.prototype = {
+      functionAttr: function FooDataType_functionAttr() {
+        return 3;
+      },
+      dataAttr1: 3
+      _privateDataAttr1: 3
+    }
+
+    return FooDataType;
+  })();
+
+  var x = new FooDataType();
+
+  Using `new Foo()` automatically gives it a `.constructor` property
+  pointing at the constructor function Foo. This property is actually on
+  Foo.prototype, and can be accessed through Foo.prototype.constructor.
+  Typing {} is equivalent to typing `new Object()`.
+
+  override Object.prototype.toSource to provide a "repr"
+
+
+
+  The only really safe way to check for an own property is:
+  Object.prototype.hasOwnProperty.call(object, property)
+  This checks if a property is enumerable:
+  Object.prototype.propertyIsEnumerable.call(object, "foo")
+
+  Object.freeze()
+  Object.getPrototypeOf()
+
+  Subclassing:
+  function Subclass(args) {
+    SuperClass.call(this, args)
+  }
+  Subclass.prototype = Object.create(Superclass.prototype);
+  Subclass.prototype.constructor = Subclass // for instanceof to work
+
+  maybe some kind of `abc` module?
+
+- Assign with `=`
+- Check for equality with `===`. Inequality `!==`.
+- Numerical comparisons with `<` `>`, `<=`, `>=`.
+
+
+- Function-scoped local variables.
+  function () {
+    var foo = x; // Scoped to the function.
+  }
+
+- standard C-like operators + - ++ -- * / >> << >>> | & ^ && || ! ?: and
+  <op>= for the relevant ones.
+
+
+- Standard if-else
+  if (foo) {
+    doSomething();
+  } else {
+    doSomethingElse();
+  }
+
+- Standard C for-loop:
+  // Note that `i` is scoped to the function.
+  for (var i = 0; i < numElts; i++) {
+    doSomething(i);
+  }
+
+- C-like Switch. But can switch on numbers, characters, strings.
+
+- Standard file stuff:
+
+  (function () {
+  'use strict';
+
+  })();
+
+  or for a "module":
+
+  var MyModuleName = (function MyModuleNameIIFE() {
+  'use strict';
+
+  })();
+
+* Avoid anonymous functions. Give functions explicit names.
+
+
+Also, look at the way the program is structured in
+<http://acko.net/files/never-seen-the-sky/git/>.
+
+
+
+% varargs
+
+function argumentCounter() {
+  print("You gave me ", arguments.length, " arguments.");
+}
+argumentCounter("Death", "Famine", "Pestilence");
+
+// This generalizes easily.
+function add(number, howmuch) {
+  if (arguments.length < 2)
+    howmuch = 1;
+  return number + howmuch;
+}
+
+// General way to "forward all arguments"
+// could also pass `this` instead of null for exact forwarding.
+function negate(func) {
+  return function() {
+    return !func.apply(null, arguments);
+  };
+}
+
+forwarding pattern:
+function getUserMedia() {
+  var fn = navigator.getUserMedia || navigator.webkitGetUserMedia;
+  fn.apply(navigator, arguments);
+}
+
+exceptions:
+throw new Error("Fire!");
+(v8 bails on functions with try/catch, but I don't think it minds throws)
+use unique values for exceptions if you want your own. e.g.
+var FoundSeven = {};
+...
+throw FoundSeven;
+...
+} catch (exc) {
+  if (exc !== FoundSeven) {
+    throw exc;
+  }
+  ...
+}
+
+
+useful:
+function randomInteger(below) {
+  return Math.floor(Math.random() * below);
+}
+
+escape(' ') --> '%20'
+
+
+timing:
+Use setInterval() and clearInterval() to do things periodically
+(clearInterval takes the cookie returned by setInterval)
+One-shot versions setTimeout, clearTimeout (clearTimeout takes the cookie
+returned by setTimeout)
+requestAnimationFrame for drawing graphics.
+
+
+% thoughts
+the idea of "ring-0" JavaScript is really interesting.
+
+
+% good/bad parts
+undefined, Infinity, NaN are now actually constants.
+/foo/ -- every regex expression creates a new regex every time: set these
+to constants if you don't need this behavior.
+
+% JSON
+JSON.parse(text, reviver)
+JSON.stringify(value, replacer, space)
+
+% Strict mode
+Makes it impossible to accidentally create global variables:
+foo = 3; // ReferenceError
+
+% Data structuring.
+
+Look at node/lib/_linklist.js for a really cool way to do things.
+Basically, you do linkList.init(obj) which sets two links on obj
+pointing at the object itself, similar to how you would do things in C,
+except dynamic. As long as you always do this in a place where the objects
+you apply it to have the same "shape", then the outgoing objects will have
+the same "shape", and it shouldn't count as monkeypatching. For example,
+you could do this in a constructor.
+
+
+general wisdom:
+Defining a 'little language' like this is often a very powerful technique ―
+when, at any time, you find yourself writing repetitive or redundant code,
+stop and try to come up with a vocabulary that makes it shorter and denser.
+
+Whenever you find yourself about to mix data representation and
+problem-specific code in one object, it is a good idea to try and put the
+data representation code into a separate type of object.
+
+I do not recommend writing modules like this right from the start. While
+you are still working on a piece of code, it is easier to just use the
+simple approach we have used so far, and put everything at top level. That
+way, you can inspect the module's internal values in your browser, and test
+them out. Once a module is more or less finished, it is not difficult to
+wrap it in a function.
+
+Sometimes the solution is to provide two interfaces, a detailed 'low-level'
+one for complicated things, and a simple 'high-level' one for
+straightforward situations. The second one can usually be built very easily
+using the tools provided by the first one.
+
+Computer programs: the most complicated things people make.
+(there are lots of things that are very complicated, like the LHC or an
+airplane, but those systems have "manufacturing/logistical cost" which
+throttles the accretion of complexity (e.g. you can only use so much metal
+in an airplane, which limits the complexity); with computer programs, there
+is no such limitation, so they grow explosively and "uncontrollably" in
+complexity.)
+
+Don't let "the gut" (vs "the head") dictate programming.
+
+"I'm not saying that it isn't useful. I'm saying that there is never a case
+where it isn't confusing".
+Confusion must be avoided. Confusion is the enemy. Confusion is what causes
+bugs.
+
+If there is a feature of a language that is sometimes problematic, and if
+it can be replaced with another feature that is more reliable, then always
+use the more reliable feature. Literally think to yourself "is the cost
+zero, but it eliminates a whole class of bugs?" if yes, then just do it,
+even if your gut has some reservations.
+
+Avoid forms that are difficult to distinguish from common errors.
+
+You want people to be able to understand your program so that they can
+transform it into something of greater value. That is why code has to be
+readable.
+
+Make your programs look like what they do.
+
+Write in a way that clearly communicates your intent. That is what we
+should be doing as programmers.
+
+For no cost, by adopting a more rigorous style, many classes of errors can
+be automatically avoided.
+As our processes become more agile, our coding must be more resilient.
+We choose our features because we want to improve our error rate.
+Forms that can hide defects are considered defective.
+
+Good style is good for your gut.
+
+"If the program doesn't need to be correct, I can make it arbitrarily
+fast."
+
+But do not let that discourage you. With the right kind of
+obsessive-compulsive mindset, such problems provide wonderful challenges.
+And for those of us who do not like wasting our time, being careful and
+avoiding the obscure corners of the browser's functionality will generally
+prevent you from running into too much trouble.
+
+"Do I not destroy my enemies when I make them my friends?"
+
+Turning N*M problems into N+M by defining a common intermediate format is
+a common technique in programming (and organizing complex systems in
+general).
+
+%% http://www.youtube.com/watch?v=t9YLtDJZtPY
+
+First rule of optimization: optimize the thing that takes the most time.
+Programmers think they spend all their time typing, so they try to optimize
+their keystrokes. It would probably take you a day or two to type in all
+the code that you write in a year: where is the other 99% of your time
+going?
+
+In other industries, legacy is the wealth of practice and tradition. In
+software, past accomplishments are considered a liability.
+
+Software is not governed by Moore's Law. It is governed by Murphy's Law.
+
+Leaps (happen about every 20 years; slow adoption):
+Plugboards
+Symbolic assembly language
+High level languages
+Structured programming
+Object oriented programming
+Service oriented systems (current leaping phase)
+
+Software does not have enough self-awareness to be afraid of bugs. That's
+why it works as well as it does.
+
+**The kinds of things that you do to make your program more secure tend to be
+generally good things from a programming standpoint (e.g. modularity,
+separation of concerns, information hiding, etc.).
+
+Prototype + rewrite (with focus on simplicity to avoid second-system
+effect). Experience gained in writing the first implementation means that
+the second one will take *much* less time.
+
+Programming is a very social activity. Code reviews and design reviews are
+one big example.
+
+Detecting harmful features: "Can we live without it?" Does it let us write
+programs that we could otherwise not write?
+Remove inessential features and forms that cannot be distinguished from
+common errors. Look at what is left: is it a complete language? It turned
+out that it wasn't just a sufficient language; it was a superior language.
+You have a power that the language standardization committee doesn't have:
+you can remove features by the language by just refusing to use them.
+
+Bugs are an inevitable hazard of programming. We should shift the odds in
+our favor. Anyting we can do to shift the odds in our favor is a good
+tradeoff.
+
+<http://www.youtube.com/watch?v=0SARbwvhupQ>
+"There's a pervasive elitism in the programming community. Add anonymity to
+the mix, and everyone is suddenly elite."
+There's a general desire to not look stupid.
+The ultimate geek fantasy is to go off in your cave and code, and shock the
+world with your brilliant new invention, but that rarely happens. That's
+just not how things work.
+The flipside is "I don't want people to see my mistakes".
+Code review taps into this psychological aspect to make code better.
+**You want other people seeing what you're doing as soon as it makes sense.**
+
+Avoiding the trap:
+- Drop the ego. Avoid having a large personal ego but build a strong
+  collective ego around your project or the software you're working on.
+- Criticism is not evil. Learn to take code criticism and effectively
+  communicate constructive criticism about other code.
+- Embrace failure. When failure happens, don't freak out; learn from it,
+  document what whent wrong. It's not about assigning blame: it's about
+  figuring out what when wrong so that it never happens again. Make the
+  mental shift "ok, some of my attempats are going to fail, no big deal".
+- Iterate quickly. Fail fast when you are on track to failure.
+- Practice is key. Practice working on stuff and failing.
+- Be a small fish. When you are a big fish, it's comfortable, but you don't
+  learn very much and don't get much better.
+- Be influenced.
+- Be vulnerable. Admit your mistakes.
+
+"You cannot apply a technological issue to a sociological problem..."
+"... usually"
+Technological changes can encourage good societal behavior.
+Requiring people to sign in to leave a comment on a bug tracker is an
+example.
+Or Google Code requiring to choose between one of a small set of
+well-known and respected open source licenses.
+Default behaviors matter a lot. You have to ask yourself: what social
+behaviors are the defaults of this tool encouraging in people.
+
+Try to involve people with your project in the sweet spot. Not too early,
+not too late. Project should have a clear direction; someone else shouldn't
+be able to come in and derail it. You also need to have some amount of
+running code; it doesn't have to be much, but it does have to be enough to
+show people that you are serious and get the ideas spinning in other
+people's heads.
+
+Document your failures.
+
+- Don't try to be a genius.
+- Collaborate early and often.
+- Pay attention to your tools (how you collaborate).
+- Pay attention to timing (when you collaborate).
+(Secret: If you do these things, then people will think you're a genius)
+(There are actual geniuses, but there are *far* fewer than most people
+realize. The talk mostly set it up as a strawman; they do exist.)
+
+
+There are lots of stupid little choices to make in programming that are
+like what side of the road you drive on: it doesn't really matter what side
+is the side of the road to drive on, but it is important that everyone
+drives on the same side! Try to find these kinds of issues and automate
+them out of existence.
+
+"That hardly ever happens" <==> "it happens". If something "hardly ever
+causes an error", then it causes errors.
+
+Creativity in writing comes from using the right words. Using a
+predetermined set of typographical rules (upper case, lowercase, spaces
+between words, etc.) in no way limits your creativity when writing. The
+same is true for programming.
+**The only downside I can think of to being absolutely consistent with the
+most error-resistant forms is that they are annoying or difficult to type
+out, but that can be solved with automation.**
+
+**Make your programs look like what they do**.
+
+While typechecking catches many mistakes, there's an even larger class of
+mistakes that typechecking doesn't catch. So you still need to test
+regardless.
+
+Is code using this language feature likely to get damaged during
+maintenance?
+
+The less we have to agree on in order to work together, the better. This
+can be used as a criterion for designing interfaces (and especially
+standards).
+
+It's easy to make things bigger; it's harder to make things better.
+
+<http://cleancoder.posterous.com/the-transformation-priority-premise>
+An interesting duality:
+- Refactoring: changes code structure without changing behavior
+- Transformation: changes code behavior without changing structure
+Presents a principle for incrementally improving code in a way that avoids
+situations where you have to "rewrite everything". Basically, use the
+"highest priority" (simplest) transformation possible (he gives an
+approximate hierarchy ranking the kinds of transformations).
+
+Also presents some interesting food for thought: "as the tests get more
+specific, the implementation gets more generic".
+
+<http://www.youtube.com/watch?v=GaqxIMLLOu8>
+Some *really* great insights.
+
+
+
+% Optimization
+
+Optimize your optimizing.
+
+Fundamental equation of optimization
+t = c * n
+t - total time
+c - cost per iteration
+n - number of iterations
+People tend to focus on c. In most cases c isn't the place that needs
+optimizing.
+
+Performance Threshold (first three are typical thresholds in the browser):
+- Distraction ~100ms
+- Frustration ~1s
+- Session failure ~10s
+- Impractical
+- Infeasible
+- Impossible
+
+To get under the Distraction limit, it is necessary to give immediate
+feedback.
+To get under the Frustration limit, it is necessary to keep n small. Just
+in time data delivery.
+
+Don't fiddle! Find where time is being spent. It is counter productive to
+speed up the places where time is not being spent.
+
+We think: Every bit of waste you squeeze out helps performance.
+Surprisingly, this is not true.
+
+Don't tune for quirks of browsers. Performance characteristics of the next
+generation may change.
+
+**Avoid short-term optimizations.**
+
+Less time is being spent in JavaScript code than you think.
+
+Clean, elegant code. Think of it as a form of meta-optimization. It's a
+good use of your time.
+
+Performance without measurement is meaningless.
+
+JavaScript is usually not the bottleneck!
+
+Easy way to track timing:
+console.time('timerName');
+// Do stuff...
+console.timeEnd('timerName'); // Prints time for 'timerName' to the console.
+
+
+
+% about JS
+
+As awful as the DOM is,
+JavaScript + DOM is effective.
+
+JavaScript programmers are smarter about using event loops than programmers
+of other languages. This is because JS doesn't have a blocking "READ".
+
+Event loops are key to having useful interfaces.
+
+~/Documents/programming/js/crockford-loopage-slides.pdf
+contains a JS pseudo-implementation of what happens when a DOM event fires.
+
+use spaces to disambiguate parens:
+use space before in all cases except where it follows a function name.
+function() {} -> function () {}
+
+Always use ===, not ==. This is not about cargo-culting or FUD; it is
+because when someone reads the code they have to ask themselves "is this
+guy just incompetent, or is this one of the places where == actually
+behaves like ===?". Completely avoid the issue by always using ===.
+
+Declare all variables at the top of the function. Yes, even induction
+variables in for loops. This makes the program look the way it behaves.
+Waa! I know. Deal with it. Write in the language you are writing in.
+(This also probably will have the side effect of making you keep your
+functions smaller; replace "vars in the middle of your function" with
+nested helper functions (which, you will note, have var declarations at
+their top)).
+
+When using global variables, name them LIKE_THIS to be explicit about what
+they are. Globals should stick out like a sore thumb.
+
+Using `new`??? Now that we have Object.create, is there any reason to use
+`new`? Can write an "instanceOf" yourself that just goes up the prototype
+chain with Object.getPrototypeOf and do things "the right way" (emphasis on
+the prototype, without focusing on the constructor).
+This allows keeping things "cleaner" by avoiding magic done by `new`. On
+the other hand, `new` makes the creation of new objects of the data type
+more obvious. idk which to use.
+
+Use ALLCAPS for globals. Similar to the reason that ALLCAPS is used C for
+preprocessor macros. It is a recognized language design error and the use
+of an annoying naming convention call it out so that you know you are using
+something harmful.
+
+++ is a hard habit to break. Leads to terse, tricky code for people like me
+(and apparently Douglas Crockford too) who get really "turned on" by
+performance things. "I don't trust myself to use this".
+Even all things aside, it just doesn't pull its weight as a language
+feature: save one character? (remember: typing time is negligible). What
+are the chances of error and confusion that it could cause? Non-negligible.
+It's like running with scissors: it's a bit childish to say "it hasn't hurt
+me yet" when you run with scissors next to your eyes. **We're trying to be
+professional.**
+
+Crockford says "JSLint is my proofreader. JSLint makes it easier for me to
+write good code".
+
+"It turns out that, when you understand this language, you can write really
+good programs, beautiful programs." In fact, you really have to write good
+programs because it is so easy to write bad ones that you really have to be
+intending to write good ones.
+
+Good parts: objects and lexically scoped first class functions with
+closures.
+
+Google Closure tools seem to offer a really nice "full package" for large
+scale web app development. The Closure Compiler is actually a
+*whole-program* optimizing compiler: you basically feed in all your
+templates, JavaScript, and the cLosure library, and it spits out a
+optimized and tree-shaked version. I'm not sure how useful this will be to
+me, at least at first. It seems like the kind of thing that after building
+something that works well and have fleshed out the requirements, you
+rebuild it on top of Google Closure to really get it right. It seems to
+encourage "not using JavaScript how it was meant to be", but instead a bit
+more like Java, or with extra-linguistic crutches (e.g. types declared in
+comments, magical "require" and "provide" statements that are interpreted
+by the Closure Compiler, etc.); at that point, it's not clear that it
+offers any significant advantage to simply developing the application with
+Dart or other "Compile to JS" solutions---the output of the Closure
+Compiler is basically a "Compile to JS" solution, except the source
+language happens to be JavaScript. My initial impression is that due to its
+whole-program nature, using the Closure Tools will discourage (and hamper)
+using other functionality that does not conform to its way of doing things.
+He says "instead of running from JavaScript to another language, use
+Closure Tools to help tame it".
+
+It's an "antipattern" to have a callback that admits an "error"
+possibility, because it forces error-handling boilerplate into *every*
+callback. Instead, take a "success" and "error" callback so that the error
+check can be centralized into one place in your code that chooses which
+callback to call, and clients can reuse the same error function for
+different calls (or generally abstract the error handling using functions).
+
+Model-View-ViewModel: Put ViewModel between core data model and UI. For
+example, View would be the DOM, Model would be your core data model, and
+ViewModel would be a component that holds the actual UI state and shepherds
+the DOM. ViewModel transforms Model for View.
+
+console.memory (Chrome's "timeline" in the developer tools has the ability
+to see memory consumption graphically in real time (and lots of other
+things))
+
+In node, use setImmediate(func, [arg1, ...]) to schedule work to be
+immediately done. It's the preferred way to yield to the event loop (e.g.
+to avoid starving IO).
+There is a corresponding clearImmediate(immediateID).
+It has been proposed for the browser, but it doesn't look like it's gaining
+traction.
+
+Douglas Crockford is probably the most "mature" programmer I've ever seen.
+He is always very level-headed and calls out things that are "childish",
+which seem alright in a lot of ways, but after looking closely at them
+really turn out to be childish.
+
+Objects inherit from other object, not classes, which makes things simpler
+and more regular.
+
+Good Parts:
+- Lambda (lexically scoped closures)
+- Dynamic objects
+- Loose typing (variables can hold any type)
+- Object Literals
+
+Working with the Grain: use the language how it wants to be used.
+
+TDOP is a nice compromise between pure recursive-descent and PEG's which
+are much more declarative and "lock you out" (PEG's, like lpeg, do allow
+some nice interaction, but in the end they are not enough for parsing whole
+languages with the level of "code inside" necessary to give e.g. great
+diagnostics).
+
+More Good Parts:
+- Your JavaScript application can reach a potential audience of billions.
+  No other programming platform can currently do that.
+
+Portability is the single best thing that the web has over all other
+application delivery systems.
+
+"The solution, as is common in JavaScript, involves putting another
+function in there".
+
+Optimize for the Principle of Least Authority: only give things the minimum
+capabilities that they need in order to work.
+
+I think I've come to a great enlightenment about why I should develop on
+the web platform. It's actually really simple. Every time someone says "oh
+but the web has portability problems like every other platform", they are
+correct: there are portability issues. The difference is that in the web
+platform, those portability issues are gradually shrinking as consensus is
+reached and API's are standardized. In other platforms, the portability
+issues are not shrinking: e.g. it's *possible* to write an application in,
+say, C++ and have it work across a huge variety of platforms, but it will
+require constant maintenance as those platforms go their diverging ways.
+Not to mention instant, worldwide, single-click application delivery and
+all the other benefits, but the main one is what I just said: there is hope
+that the web platform will eventually yield true universal portability out
+of the box; all other platforms have already given up on that goal.
+Hopefully this will finally end the "accumulation of layers of crud" that
+our civilization puts on our computers by being one that we actively work
+on agreeing upon the interfaces. The "accumulation of layers of crud"
+basically is driven by this process:
+Lots of architectures and hardware variation
+-> need "layer" of kernel and C to paper over it
+Lots of different kernels (and generally OS's, graphics API's etc.)
+-> need "layer" of browser and JavaScript to paper over it.
+Hopefully we'll not mess it up this time so that we don't need yet another
+fundamental layer to paper over browser and JavaScript differences.
+
+% Monads
+
+It's basically the "Ajax" chaining pattern. ("return this")
+
+monad.bind(func); monad.bind(func, [a, b, c]);
+<->
+monad.method(); monad.method(a, b, c);
+
+<http://www.youtube.com/watch?v=dkZFtimgAcM>
+
+Turn based processing:
+Single-threaded, race-free, deadlock-free.
+The Law of Turns: Never wait. Never block. Finish fast.
+Events, message passing. replace threads, mutexes.
+
+<http://www.youtube.com/watch?v=4mf_yNLlgic>
+Lots of useful tips for using the Chrome Devtools console.
+$0 - node selected in Elements view.
+console.dir()/dir() - give "properties-oriented" view of a DOM node or
+other object.
+$$ - a wrapper around querySelectorAll.
+
+monitorEvents(domElement) - log all events on that element to the console.
+monitorEvents(domElement, kind) - only mouse or keyboard events.
+unmonitorEvents(domElement) - stop monitoring events on that element
+`kind` can be one of
+mouse:
+    "mousedown", "mouseup", "click", "dblclick", "mousemove", "mouseover",
+    "mouseout", "mousewheel"
+key: "keydown", "keyup", "keypress", "textInput"
+touch:  "touchstart", "touchmove", "touchend", "touchcancel"
+control
+    "resize", "scroll", "zoom", "focus", "blur", "select", "change",
+    "submit", "reset"
+no arguments:
+    all of the above + "load", "unload", "abort", "error", "select",
+    "change", "submit", "reset", "focus", "blur", "resize", "scroll",
+    "search", "devicemotion", "deviceorientation"
+
+keys - shortcut for Object.keys()
+values - all enumerable properties (including inherited)
+
+copy(x) - copy x to clipboard
+
+
+
+
+TODO:
+The checks in Crockford's JSLint are empirically based on programming
+errors seen in the wild; should use it. Along with jshint. Also need to rig
+them up to be automated in some way.
+
+
+% Prototypal inheritance
+
+Sometimes called "differential inheritance", because you only specify the
+differences between one generation and the next.
+
+Object.create(prototype)
+
+Or, by combining these three things:
+- The notion of Constructor functions
+    function SomeConstructor(x) {
+        this.foo = x;
+    }
+- The `.prototype` member of functions.
+    SomeConstructor.prototype.someMethod = function (a) { ... };
+    SomeConstructor.prototype.otherMethod = function (b) { ... };
+- The `new` operator.
+    var bar = new SomeConstructor(3);
+
+The basic useage of Object.create essentially does:
+function object(o) {
+    function F() {}
+    F.prototype = o;
+    return new F();
+}
+(but note that object.create also can take a property object as a second
+argument)
+
+You can write complete JavaScript programs without `new`. Use what
+Crockford calls "power constructors" which call Object.create() at the very
+beginning (and assign it to `that`), or another "power constructor";
+effectively, the constructor "at the top of the inheritance hierarchy" is
+the one that calls Object.create(). It's conceptually a lot more elegant.
+You use regular prototypal inheritance for "public" things, and this
+"parasitic inheritance" for things that have to be secret. Pseudoclassical
+patterns are less effective than prototypal patterns or parasitic patterns.
+
+
+

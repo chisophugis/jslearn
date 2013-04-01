@@ -1,0 +1,7 @@
+Setting and getting the 'title' property on the SelectedImageModel instead
+of on the selected image itself.
+
+2x Mistyping the event 'selectedimage' as 'selectedImage'.
+
+Lots of syntax errors due to forgetting commas when adding new properties
+to object literals.

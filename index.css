@@ -1,0 +1,16 @@
+.code-keyword {
+    color: rgb(69, 213, 63);
+}
+
+.editor {
+    font-family: "Ubuntu Mono";
+    border: 1px solid #000;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+/*
+* {
+   border: 1px solid red !important;
+}
+*/

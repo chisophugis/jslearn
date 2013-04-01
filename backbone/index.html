@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Image Gallery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    -->
+    <link href="index.css" rel="stylesheet">
+  </head>
+  <body>
+
+    <div id="nav">
+      <form id="inputform">
+        <input type="url" id="url-entry" placeholder="Enter an image URL..." />
+        <input type="submit">
+      </form>
+      <div id="gallery">
+        <ul id="image-list">
+        </ul>
+      </div>
+    </div>
+    <div id="body-content">
+        <!--
+
+      <label>URL:</label>
+      <input type="url" value="http://catpictures.us/images/gallery/uploads_big/cat/catpicture-514.jpg" />
+      <label>Title:</label>
+      <input type="text" value="fat ginger cat" />
+      <label>Notes:</label>
+      <textarea>It sits on a step.</textarea>
+      <img src="http://catpictures.us/images/gallery/uploads_big/cat/catpicture-514.jpg" />
+      -->
+    </div>
+    <script id="body-content-template" type="text/x-handlebars-template">
+      <label>Id:</label>
+      <input type="text" disabled value="{{id}}" />
+      <label>URL:</label>
+      <input type="url" value="{{url}}" id="img-url"/>
+      <label>Title:</label>
+      <input type="text" value="{{title}}" id="img-title" />
+      <label>Notes:</label>
+      <textarea>{{notes}}</textarea>
+      <input type="button" id="destroy" value="Destroy" />
+      <img src="{{url}}" />
+    </script>
+
+    <script id="image-list-entry-view-template" type="text/x-handlebars-template">
+      {{title}}
+    </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.0-rc.3/handlebars.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/backbone-localstorage.js/1.1.0/backbone.localStorage-min.js"></script>
+    <script src="index.js"></script>
+    <!--
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    -->
+  </body>
+</html>

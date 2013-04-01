@@ -1,0 +1,135 @@
+% Events
+
+// capturing phase handler
+document.addEventListener("click", handleClick, true);
+// bubbling phase handler
+document.addEventListener("click", handleClick, false);
+
+Capturing goes first. Bubbling is the default (e.g. el.onclick = ...; will
+create an event handler for the bubbling phase).
+
+Not all events bubble, but mouse and keyboard events do.
+
+Event delegation lets you centralize all the event handling for a logical
+subtree of nodes. This reduced memory consumption because there is only one
+handler function. Additionally, this works well when adding elements to the
+subtree since you don't need to attach a new event handler to them as long
+as the centralized handler will know what to do with the element.
+
+% Modifying the DOM
+
+// Remove all children and replace them with a single text node containing
+// just 'foo'.
+element.textContent = 'foo';
+
+// Returns the concatenation of the .textContent for all children,
+// excluding comments and processing instruction nodes.
+// Base case: text nodes return just their node.nodeValue. Actually, any
+// element with a non-null .nodeValue is a base case that just returns the
+// .nodeValue (includes Text, Comment, ProcessingInstruction, CDATASection).
+... = element.textContent;
+
+
+element.insertAdjacentHTML(position, 'html')
+where position is one of:
+'beforebegin'
+'afterbegin'
+'beforeend'
+'afterend'
+which correspond to the positions for <p>foo</p>:
+<!-- beforebegin -->
+<p>
+<!-- afterbegin -->
+foo
+<!-- beforeend -->
+</p>
+<!-- afterend -->
+(minus the newline whitespace I have here)
+
+'beforebegin' and 'afterend' only work if the element is in a tree and has
+a parent element.
+
+
+
+% The current URL
+
+window.location contains information about the current page's URL. For
+example, window.location.href contains the full URL. Also
+window.location.origin + window.location.pathname + window.location.hash
+==== window.location.href
+
+% The browser
+
+The scripted browser:
+Flow   --> Paint
+^            |
+|            V
+Script <-- Event
+
+document.documentElement gives the <html> tag.
+document.body gives the <body> tag.
+
+id's are to uniquely identify an element.
+
+DOM Node links:
+
+firstChild, lastChild
+nextSibling, previousSibling
+Same, but ignore whitespace text nodes:
+firstElementChild, lastElementChild
+nextElementSibling, previousElementSibling
+
+node.parentNode (either and Element, Document, or DocumentFragment, or null)
+node.parentElement (if the parentNode is an Element, then return it, else null)
+
+node.childNodes --> NodeList (array-like object)
+
+
+Walking the DOM:
+Only need the firstChild and nextSibling links:
+function walkTheDOM(node, func) {
+    var child;
+    func(node);
+    for (child = node.firstChild; child; child = child.nextSibling) {
+        walkTheDOM(child, func);
+    }
+}
+
+
+Creating DOM:
+document.createElement(tagName);
+document.createTextNode(text);
+node.cloneNode() -- clone individual element
+node.cloneNode(true) -- clone element and all its descendents
+// appending a DocumentFragment appends all its children.
+// A DocumentFragment is a Node.
+document.createDocumentFragment()
+New nodes are not connected to the document.
+
+Linking DOM:
+node.appendChild(node)
+These are braindead:
+node.insertBefore(newNode, sibling)
+node.replaceChild(newNode, toBeReplaced)
+They are basically
+sibling.parentNode.insertBefore(new, siblilng)
+old.parentNode.replaceChild(new, old)
+
+Removing DOM:
+node.removeChild(old) // Braindead.
+old.parentNode.removeChild(old);
+
+
+% Events
+
+The browser has an event-driven, single-threaded, asynchronous programming
+model.
+Events are targeted to particular nodes.
+Events cause the invocation of event handler functions.
+
+event.target is the original element (the deepest) that the event fired on.
+event.stopPropagation()
+event.preventDefault()
+
+target.addEventListener(type, listener, false);
+
