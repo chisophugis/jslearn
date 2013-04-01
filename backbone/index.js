@@ -5,6 +5,7 @@ var ImageDetailsView = Backbone.View.extend({
     events: {
         'change #img-title': 'updateTitle',
         'change #img-url': 'updateURL',
+        'change #img-notes': 'updateNotes',
         'click #destroy': 'destroy'
     },
     initialize: function () {
@@ -18,7 +19,12 @@ var ImageDetailsView = Backbone.View.extend({
     },
     updateTitle: function (event) {
         this.model.performOnSelectedImage(function (image) {
-            image.set('title', event.target.value);
+            image.save('title', event.target.value);
+        });
+    },
+    updateNotes: function (event) {
+        this.model.performOnSelectedImage(function (image) {
+            image.save('notes', event.target.value);
         });
     },
     updateURL: function (event) {

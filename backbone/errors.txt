@@ -5,3 +5,5 @@ of on the selected image itself.
 
 Lots of syntax errors due to forgetting commas when adding new properties
 to object literals.
+
+Using `.set` instead of `.save`.
