@@ -1,2 +1,8 @@
 Avoid defining more than one datatype in a single place. Otherwise, things
 get tangled.
+One reason for this is that it is really hard to "orient yourself" because
+things can be done in lots of different orders. E.g. in C++ it's easy to
+see "oh, I'm at the end of a class" or to easily scan for all the classes
+in a file, but it's not really possible to do that in JavaScript since
+there are multiple ways to do it. The solution is to only define one thing
+in a given place (e.g. per file).
