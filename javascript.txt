@@ -273,6 +273,12 @@ Array.isArray(obj)
 Function.prototype.bind(thisArg, [arg1, ...])
 useful pattern: this.method.bind(this)
 
+fn.length --> number of arguments the function is expecting.
+var f1 = function (a) {};
+assert(f1.length === 1);
+var f2 = function (a, b) {};
+assert(f2.length === 2);
+
 
 
 
