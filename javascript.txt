@@ -1,6 +1,6 @@
 So, in JavaScript, you basically have:
 
-- Basic key(string)-value mappings from strings to values.
+- Basic key-value mappings from strings to values.
 
 % Object
 
