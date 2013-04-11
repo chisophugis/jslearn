@@ -1,0 +1,135 @@
+Tip:
+./node_modules/.bin/ contains executables of any packages you have
+installed locally.
+
+http://visionmedia.github.io/expresso/
+Appears to be a legit, no-nonsense testing frameword.
+http://visionmedia.github.io/mocha/
+The successor of expresso. Supports both TDD and BDD style.
+Oh wow, this is fantastic:
+http://visionmedia.github.io/mocha/example/tests.html
+This would make great documentation.
+Also, mocha appears to have a nice integration with coverage reporters.
+
+Tip:
+It looks like there is a common practice of putting housekeeping tasks in a
+top-level Makefile. I think it's mostly a convenient way to put a name on
+specific commands and specify minimal dependencies between them. It's
+always like just one tiny command, so none of the "badness" of make (such
+as when using it in a build system) comes through.
+Since make is available everywhere, it's convenient.
+E.g.:
+ test:
+   ./node_modules/.bin/mocha \
+     --reporter list
+
+ .PHONY: test
+Also, you have a lightweight power to parametrize things, like:
+  $ make test REPORTER=list
+With
+  REPORTER ?= dot
+in the Makefile.
+This also is a good place to put calls to ./node_modules/.bin/somecommand.
+
+There's also `npm run-script` for this kind of automation, and a couple
+built-in "shortcuts" like `npm start`, `npm test`, etc.
+See `npm help scripts`.
+I think the makefile way is generally more robust and slightly more
+flexible. It makes sense for the npm scripts functionality to call into
+single Makefile commands. E.g.
+  "scripts": {
+    "test": "make test-all"
+  },
+which still allows the flexibility of make for manual runs.
+
+
+Useful:
+https://github.com/learnboost/up
+
+Handy:
+require() can read and parse JSON files automatically.
+
+Handy tricks for improving workflow:
+http://www.devthought.com/2012/02/17/npm-tricks
+
+Awesome example of API design simplicity "keeping it simple":
+https://github.com/guille/ms.js
+
+Pin dependencies to git commit-ish's (see `npm help json`):
+git://github.com/user/project.git#commit-ish
+
+Ah, `npm help developers` for an intro to using npm to help your
+development workflow.
+
+
+http://www.futurealoof.com/posts/tc-thirty-what.html
+Interesting:
+  "It’s actually the policy in node.js that users do not call new on APIs
+  in core and most modules follow the same patten of returning an
+  instantiated object from a normal function to remove this confusion from
+  taking place."
+I should keep that in mind. (and use the instanceof "ctor guard" in
+constructors).
+
+
+http://www.futurealoof.com/posts/the-way-of-node.html
+  It is a tenet of Node that any API that abstracts from the programmer the
+  fact that they are going to do an IO operation is not Node.
+This one is cool:
+  Node is not going to include that module.
+  Node will not grow to include new modules, no matter how good they are or
+  how distributed they’ve become. The kind of inclusion that you see across
+  other platforms that grow large standard libraries has a negative effect
+  on continued growth and maturity of the module community.
+I think that C++ could benefit from this.
+
+Not really related to node, but: http://freenode.net/catalysts.shtml
+
+I love this talk:
+http://www.youtube.com/watch?v=GaqxIMLLOu8
+Not many other languages allow something this simple.
+  module.exports = function () {}
+The simple callback pattern error-first, then success. It *works*. It may
+be a bit ugly, but the fact of the matter is that it is ubiquitous,
+unbelievably simple, instantly understandable, and ultimately gives the
+greatest generality and doesn't introduce unnecessary abstractions or
+ceremeonly (that e.g. a future library might).
+  request.get(url, function (e, resp) {
+    // something...
+  });
+When things get more complicated, it's easy to manage these callbacks when
+you *decide to manage them*. For example, use the extremely popular `async`
+module: https://github.com/caolan/async
+Github defines a language for contribution. This has eliminated whole
+classes of discussions from the node ecosystem that other projects have to
+deal with.
+
+
+This code is beautiful:
+https://github.com/caolan/async/blob/master/lib/async.js
+
+https://github.com/domenic/opener
+Useful for automation.
+
+
+The callback interface is "universal" and composable. That's why it works.
+It's straightforward. It hides nothing; you know exactly what it is going
+to do.
+
+node debug foo.js
+(and use the `debugger;` statement)
+
+
+From <http://www.nodebeginner.org/>:
+  Passing functions is not only a technical consideration. With regard to
+  software design, it's almost philosophical. Just think about it: in our
+  index file, we could have passed the router object into the server, and
+  the server could have called this object's route function.
+
+  This way, we would have passed a *thing*, and the server would have used
+  this thing to do something. Hey, router thing, could you please route
+  this for me?
+
+  But the server doesn't need the thing. It only needs to get something
+  *done*, and to get something done, you don't need things at all, you need
+  *actions*. You don't need nouns, you need verbs.

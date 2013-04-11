@@ -1,0 +1,108 @@
+Dart seems to have really nice "scaling" properties. By that I mean that
+the language allows growing from just `main` and a few functions to a
+complete, large application in a very painless and incremental way.
+
+The web-components polyfill "work in the future" seems like a killer
+feature.
+
+I really like the language
+- Scaling properties. Huge win.
+- Editor is nice, although the term "lightweight" is used to describe it in
+  many places, and it's anything but lightweight (I've never seen it with
+  <600MB RSS). It seems like an indictment of the Dart platform though that
+  it isn't written in Dart.
+- For the most part, documentation has been excellent. Lots of great
+  learning material.
+
+Things I haven't liked about Dart:
+- Killer: No "solution" for native modules.
+  Compilation of modules for the native Dart VM is not integrated into the
+  package manager.
+- The actual core platform seems opaque. It's all open-source on google
+  code, but it's basically one huge source tree with maybe 5 or 10
+  different major applications inside. Is there any good reason for the
+  language VM and the editor to be in the same repository? I found
+  3 complete dart parsers (one in Java, one in the VM itself, and one in
+  Dart) in the source tree. Gimme a break!
+  There's no clear way to subset (or even use) the functionality besides as
+  the shrinkwrapped editor/sdk download.
+  Example: Compare:
+    - http://pub.dartlang.org/packages/yaml
+    - http://pub.dartlang.org/packages/fukiya
+  See the difference? One has a github link that I can follow and dive into
+  the source immediately (and contribute/report issues in a couple
+  clicks), the other doesn't and is effectively a dead end.
+  You can't just say (at the way bottom of the readme):
+    "The source code for this package is at http://code.google.com/p/dart."
+  How many clicks is it from <https://code.google.com/p/dart/> (which is
+  linked) to get to the source code of the yaml library? A lot, and good
+  luck finding it.
+  Suggestions:
+  - Every Dart module that isn't tied deeply into the VM or native
+    functionality (e.g. not the "bool" class) should not be kept in tree,
+    and should be an independent package.
+    I recommend github because it has a "standardized workflow for
+    contribution" (pull requests, issues, etc), so that anybody can easily
+    contribute to any project; google code is nicer that github in many
+    respects but doesn't support a contribution workflow (let alone a
+    standardized one) without bringing in external mailing-lists, code
+    review tools etc. which is too heavyweight for most packages.
+  - At the very least, break up the VM, editor, and dartium.
+- Why is e.g. dartdoc in _internal? dartdoc is the kind of
+  low-hanging-fruit code that would be great for a lot of people to look at
+  and contribute to.
+- No clear "center of community".
+- Standard library is poorly organized (or at least the documentation is).
+  - Every core library seems like "one big pile of stuff".
+    Example: dart:html. Why aren't the Element's somehow grouped together
+    in the documentation? It feels like I'm reading Object.keys(window).
+
+
+
+
+I'm starting to get convinced that JavaScript's "poor modularity" is
+actually a *feature*, not a bug. Why? Because it forces you to write code
+more modularly because once things start getting big they literally just
+fall apart.
+
+Dart has a bit of the the C++ syndrome of trying to put everything into the
+language. It always seems to be about "Can you do X *in your language*?".
+
+Node packages:
+- Have to be documented (or else nobody will use them) and have useful and
+  easy-enough user interfaces.
+- Tend to be small.
+- Are really-easy to depend on: this is huge. Massive code reuse.
+
+Dart: There's something about it that just feels weird. It's like a
+"slippery" C++, and I'm not talking about the dynamic types. I think it's
+the `new`'s all over the place. In C++ you always have a really good idea
+of how long things are going to live, and there's this really useful notion
+of things being on the stack. So when you see a snippet like:
+  SmallVector<Value*, 16> FixedOperands(FirstInst->op_begin(),
+                                        FirstInst->op_end());
+You know that `FixedOperands` is just temporarily being used for just this
+function.
+Maybe that's what's creeping me out in Dart.
+Or maybe it's the Java-like "objects have reference semantics" and there
+being no "value types" (except maybe primitives).
+
+All the Dart code I've looked at seems really Java-like. But the thing is
+that the appeal of Dart to me is that it's like Java (which I hate), but
+basically stripping away the shackles that Java usually enforces on you
+because it lacks expressivity by having e.g. first-class functions, nice
+lambda syntax, optional types, etc. But somehow all I see is code that
+might as well be Java with optional typing. None of JavaScript's dynamicity
+of first-class functions is coming through.
+Maybe it's that I just haven't gotten used to it.
+
+The Dart import system seems strictly less powerful than Node's require()
+or any of the decent JavaScript module systems.
+
+
+I think that JavaScript excels at making you think about your data, rather
+than code. Since serialization (through JSON) is so simple and ubiquitous,
+it's really easy to use "data" rather than programmatic abstractions.
+This may be the key awesomeness of JavaScript.
+
+
