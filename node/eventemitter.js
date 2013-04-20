@@ -47,3 +47,11 @@ ee.once('d', function () {
 });
 ee.emit('d');
 ee.emit('d');
+
+
+// `this` in event handlers is the EventEmitter that they were attached to.
+ee.someProperty = 'Property on the EventEmitter';
+ee.on('a', function () {
+    console.log(this.someProperty);
+});
+ee.emit('a');

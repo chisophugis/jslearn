@@ -45,9 +45,8 @@ setInterval(function () {
     adder.stdin.write(number + '\n');
     adder.stdout.once('data', function (data) {
         var receivedNumber = parseInt(data.toString(), 10);
-        console.log('Sent ' + number + ' Got back ' +
-                    receivedNumber +
-                    ' Difference ' + (receivedNumber - number));
+        console.log('Sent %s Got back %s Difference %s',
+                    number, receivedNumber, (receivedNumber - number));
     });
 }, 1000);
 setInterval(function () {

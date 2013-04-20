@@ -119,6 +119,11 @@ Removing DOM:
 node.removeChild(old) // Braindead.
 old.parentNode.removeChild(old);
 
+Other DOM stuff:
+node.contains(otherNode)
+node.nodeType // number
+node.nodeName // string, generalization of Element.tagName
+
 
 % Events
 

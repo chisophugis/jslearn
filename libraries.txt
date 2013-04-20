@@ -12,3 +12,14 @@ https://npmjs.org/package/commander
 https://npmjs.org/package/nopt
 https://npmjs.org/package/optimist
 
+
+Tar reader (fanatically maintained since npm depends on it):
+https://github.com/isaacs/node-tar
+
+Reading user input from the terminal:
+https://github.com/isaacs/read
+
+Streaming JSON reader:
+https://github.com/dominictarr/JSONStream
+
+http://www.catonmat.net/series/node-js-modules-you-should-know-about

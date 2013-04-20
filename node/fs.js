@@ -46,8 +46,8 @@ fs.open(fileName, 'a', function (err, fd) {
         bufferLength = writeBuffer.length,
         filePosition = 0;
     fs.write(fd,
-            writeBuffer, bufferOffset, bufferLength,
-            filePosition, function (err, writtenBytes) {
+             writeBuffer, bufferOffset, bufferLength,
+             filePosition, function (err, writtenBytes) {
         if (err) { throw err; }
         console.log('Wrote ' + String(writtenBytes) + ' bytes.');
         console.log('Closing the file...');
