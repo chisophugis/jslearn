@@ -1,0 +1,14 @@
+full-force date library.
+https://github.com/timrwood/moment/
+
+Markdown parsing:
+https://github.com/chjj/marked
+
+GIF stuff
+https://github.com/pkrumins/node-gif
+
+Option parsing:
+https://npmjs.org/package/commander
+https://npmjs.org/package/nopt
+https://npmjs.org/package/optimist
+

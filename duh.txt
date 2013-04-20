@@ -1,0 +1,4 @@
+Just write a web server that serves static assets but will pipe the result
+of browserifying (or whatever) for a "all-together.js" file.
+More generally, just make the server identify certain resources with the
+tasks needed to build them!

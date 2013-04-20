@@ -59,7 +59,7 @@ instanceOf(true, Boolean);
 
 as a sort of "super":
 function SomeConstructor() {
-  Object.getPrototypeOf(this).method('foo')
+  Object.getPrototypeOf(this).method.call(this, 'foo')
 }
 
 Control over attributes of properties of objects:
@@ -907,6 +907,9 @@ application delivery systems.
 "The solution, as is common in JavaScript, involves putting another
 function in there".
 
+"A function expression is like an object literal" -- Crockford
+I really like the mental image that creates.
+
 Optimize for the Principle of Least Authority: only give things the minimum
 capabilities that they need in order to work.
 
@@ -1024,4 +1027,16 @@ You use regular prototypal inheritance for "public" things, and this
 patterns are less effective than prototypal patterns or parasitic patterns.
 
 
+
+
+
+
+
+
+
+
+
+
+Generate a random integer in [0,10000):
+var number = Math.floor(Math.random() * 10000);
 

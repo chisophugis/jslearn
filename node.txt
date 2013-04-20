@@ -1,6 +1,6 @@
 Tip:
-./node_modules/.bin/ contains executables of any packages you have
-installed locally.
+./node_modules/.bin/ contains (symlinks to) executables of any packages you
+have installed locally.
 
 http://visionmedia.github.io/expresso/
 Appears to be a legit, no-nonsense testing frameword.
@@ -93,7 +93,7 @@ The simple callback pattern error-first, then success. It *works*. It may
 be a bit ugly, but the fact of the matter is that it is ubiquitous,
 unbelievably simple, instantly understandable, and ultimately gives the
 greatest generality and doesn't introduce unnecessary abstractions or
-ceremeonly (that e.g. a future library might).
+ceremeony (that e.g. a future/promise library might).
   request.get(url, function (e, resp) {
     // something...
   });
@@ -103,6 +103,9 @@ module: https://github.com/caolan/async
 Github defines a language for contribution. This has eliminated whole
 classes of discussions from the node ecosystem that other projects have to
 deal with.
+Mikeal makes a really good point about needing to just make assumptions:
+the language is a solved problem, just assume that it is there and don't
+bicker about it.
 
 
 This code is beautiful:
@@ -133,3 +136,82 @@ From <http://www.nodebeginner.org/>:
   But the server doesn't need the thing. It only needs to get something
   *done*, and to get something done, you don't need things at all, you need
   *actions*. You don't need nouns, you need verbs.
+
+
+Always be strict:
+node --use-strict
+
+
+A non-blocking model is *necessary* in order to build *composable*
+libraries that do IO. Libraries that do blocking IO are *not composable*
+
+
+Oh clever: pass in "route params" through `this` by making there be e.g.
+`this.params.id` for a route `/foo/:id`.
+https://npmjs.org/package/mapleTree
+May be a bit too magical. In this case though, multiples things are on
+`this` beyond the params so this is probably more scalable than a ton of
+function arguments.
+
+TJ Holowaychuk said something like:
+"The require() type modules have been demonstrated to be able to be
+automatically translated to the other formats"
+So it makes sense to use require() as a baseline module format because it
+is simple, and use smarter tooling if there is a need to convert to other
+formats.
+
+Wow, this is some really simple code:
+https://github.com/visionmedia/css-parse/blob/master/index.js
+Amazing (disturbing?) that it doesn't use a separate tokenizer step.
+
+I *really* like the use of filesystem paths (modulo file extension, meh) to
+name local modules. It makes things really explicit and clear. It's a shame
+that the extension isn't required, because then there would truly be a 1-1
+mapping to the filesystem.
+Recommendation: Always use the explicit filename when require()'ing files
+in the same package.
+
+A convention is for EventEmitter's to have an 'error' event. If an error
+occurs, then the EventEmitter should emit the 'error' event. This will call
+any listeners for that event. If there are no listeners, then it will throw
+the argument. This is special behavior of the 'error' event.
+
+
+List of "ubiquitous" node libraries:
+https://npmjs.org/package/request
+https://npmjs.org/package/JSONStream
+https://npmjs.org/package/event-stream
+
+
+This is just what I was needing!
+https://npmjs.org/package/concat-stream
+
+More useful libraries:
+https://github.com/isaacs/once
+https://npmjs.org/package/block-stream
+
+Ansi color codes and other "curses" type stuff:
+https://github.com/TooTallNate/ansi.js
+https://npmjs.org/package/charm
+
+Interesting parser example:
+https://github.com/substack/python.js
+
+
+An unbelievable amount of useful code:
+http://www.catonmat.net/blog/browserling-open-sources-90-node-modules/
+
+
+Building C++ modules:
+https://github.com/kkaefer/node-cpp-modules
+
+
+Testing:
+https://github.com/isaacs/node-tap
+https://github.com/substack/tape
+mocha
+
+
+Need to read this to know the "common" streams to use, to avoid having to
+roll my own:
+https://github.com/substack/stream-handbook

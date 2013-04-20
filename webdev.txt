@@ -1,0 +1,2 @@
+This is like exactly the sort of thing that I was thinking of:
+https://github.com/component/reactive
