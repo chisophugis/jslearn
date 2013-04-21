@@ -215,3 +215,7 @@ mocha
 Need to read this to know the "common" streams to use, to avoid having to
 roll my own:
 https://github.com/substack/stream-handbook
+
+
+Some coverage of the new streams library:
+http://dailyjs.com/2013/04/01/streams-streams-streams/

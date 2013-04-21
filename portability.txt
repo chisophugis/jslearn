@@ -1,18 +1,29 @@
-Small, portable, idioms:
+Small, portable, idioms
 
-function SimpleProtocol(options) {
-  if (!(this instanceof SimpleProtocol))
-    return new SimpleProtocol(options);
+This is the standard "data type" pattern:
 
-  // Explicitly naming the superclass is common, albeit a slight DRY
-  // violation.
-  Transform.call(this, options);
-  this._inBody = false;
-  this._sawFirstCr = false;
-  this._rawHeader = [];
-  this.header = null;
+function DataType(options) {
+  // Ctor guard.
+  if (!(this instanceof DataType))
+    return new DataType(options);
+
+  // If inheriting:
+  // (explicitly naming the superclass is common, albeit a slight DRY
+  // violation)
+  Base.call(this, options);
+
+  // Add some fields.
+  this._privateArray = []
+  this.name = 'foo';
 }
 
-SimpleProtocol.prototype = Object.create(Transform.prototype, {
-  constructor: { value: SimpleProtocol }
+DataType.prototype = Object.create(Base.prototype, {
+  constructor: { value: DataType }
 });
+
+DataType.prototype.someMethod = function () {
+  console.log('something');
+}
+DataType.prototype._somePrivateMethod = function () {
+  console.log('something');
+}
