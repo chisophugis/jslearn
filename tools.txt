@@ -1,0 +1,14 @@
+nc localhost 8080
+
+telnet localhost 8080
+
+# -i means "include headers" in output
+curl -i localhost 8001
+
+# -O means "write response into file using the remote name"
+# -s means "silent"
+# so basically this is equivalent to plain wget.
+curl -Os https://github.com/substack/stream-handbook/commit/b2ad3f9c2815c12572a7ae8422680e3b41534be2.patch
+
+# -l means "listen"
+nc -l localhost 8009

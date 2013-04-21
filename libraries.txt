@@ -23,3 +23,23 @@ Streaming JSON reader:
 https://github.com/dominictarr/JSONStream
 
 http://www.catonmat.net/series/node-js-modules-you-should-know-about
+
+Glob matching:
+https://github.com/isaacs/minimatch
+Filesystem globbing (also a good example of jsdoc-like API documentation in
+README.md):
+https://github.com/isaacs/node-glob
+
+Parsing jsdoc:
+https://github.com/visionmedia/dox
+
+General portability and user friendliness:
+https://npmjs.org/package/osenv
+
+.ini parsing:
+https://github.com/isaacs/ini
+
+a realistic nontrivial C++ binding:
+https://github.com/nikhilm/node-taglib
+(the taglib library that it binds looks amazingly professional:
+http://taglib.github.io/)

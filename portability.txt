@@ -1,0 +1,18 @@
+Small, portable, idioms:
+
+function SimpleProtocol(options) {
+  if (!(this instanceof SimpleProtocol))
+    return new SimpleProtocol(options);
+
+  // Explicitly naming the superclass is common, albeit a slight DRY
+  // violation.
+  Transform.call(this, options);
+  this._inBody = false;
+  this._sawFirstCr = false;
+  this._rawHeader = [];
+  this.header = null;
+}
+
+SimpleProtocol.prototype = Object.create(Transform.prototype, {
+  constructor: { value: SimpleProtocol }
+});
