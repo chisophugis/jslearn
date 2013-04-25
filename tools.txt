@@ -8,7 +8,7 @@ curl -i localhost 8001
 # -O means "write response into file using the remote name"
 # -s means "silent"
 # so basically this is equivalent to plain wget.
-curl -Os https://github.com/substack/stream-handbook/commit/b2ad3f9c2815c12572a7ae8422680e3b41534be2.patch
+curl -Os https://github.com/substack/stream-handbook/commit/b2ad3f9
 
 # -l means "listen"
 nc -l localhost 8009
