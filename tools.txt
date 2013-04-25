@@ -18,3 +18,22 @@ echo 'hi' | nc -u localhost 8000
 
 # listen on UDP on port 8000
 nc -l -u localhost 8000
+
+# -k (--insecure) allows self-signed certificates.
+# Recall that connections with self-signed certificates *are* encrypted and
+# just as safe in that respect as ones with signed certificates; however,
+# they are not "authorized" in the sense that a CA hasn't verified that
+# they are who they say they are.
+curl -k -i https://localhost:8008
+
+# Make the request using the given key and certificate.
+curl --key ./pems/client_key.pem --cert ./pems/client_cert.pem -k -i https://localhost:8008
+
+# Kind of like netcat, but for TLS/SSL
+openssl s_client -connect imap.gmail.com:993
+# note that for all the `openssl xxx` commands, the corresponding manpage
+# is `xxx`. e.g. `man s_client`. If the name conflicts with another command
+# (like `openssl passwd`), use `man 1ssl passwd` to look in the `1ssl`
+# section instead of just the generic `1` section.
+# The `openssl` command is basically a swiss army knife of cryptography
+# stuff.
