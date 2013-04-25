@@ -2,8 +2,8 @@ var tls = require('tls');
 var fs = require('fs');
 
 var options = {
-    key: fs.readFileSync('./openssl/client_key.pem'),
-    cert: fs.readFileSync('./openssl/client_cert.pem'),
+    key: fs.readFileSync('./pems/client_key.pem'),
+    cert: fs.readFileSync('./pems/client_cert.pem'),
     host: 'localhost',
     port: 4444,
     // "Authorization" means whether the certificate was able to be
