@@ -28,7 +28,8 @@ http.createServer(function (req, res) {
     res.write('Method: ' + req.method + '\n');
     res.write('Headers:\n');
     res.write(util.inspect(req.headers));
-    res.end();
+    res.write('\nBody:\n');
+    req.pipe(res);
 }).listen(8002);
 
 http.createServer(function (req, res) {

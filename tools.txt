@@ -12,3 +12,9 @@ curl -Os https://github.com/substack/stream-handbook/commit/b2ad3f9c2815c12572a7
 
 # -l means "listen"
 nc -l localhost 8009
+
+# -u means "UDP"
+echo 'hi' | nc -u localhost 8000
+
+# listen on UDP on port 8000
+nc -l -u localhost 8000

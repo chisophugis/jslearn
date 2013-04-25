@@ -7,7 +7,8 @@
     "grunt": "~0.4.1",
     "grunt-jslint": "~0.2.5",
     "esprima": "~1.0.2",
-    "optimist": "~0.3.7"
+    "optimist": "~0.3.7",
+    "request": "~2.20.0"
   },
   "devDependencies": {},
   "scripts": {
