@@ -43,6 +43,8 @@ a realistic nontrivial C++ binding:
 https://github.com/nikhilm/node-taglib
 (the taglib library that it binds looks amazingly professional:
 http://taglib.github.io/)
+Here is a very simple C++ binding:
+https://github.com/creationix/uvrun
 
 Shell quoting:
 https://github.com/substack/node-shell-quote
