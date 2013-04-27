@@ -3,7 +3,7 @@ Small, portable, idioms
 This is the standard "data type" pattern:
 
 function DataType(options) {
-  // Ctor guard.
+  // Ctor guard, if the class is exported.
   if (!(this instanceof DataType))
     return new DataType(options);
 
