@@ -48,3 +48,6 @@ https://github.com/creationix/uvrun
 
 Shell quoting:
 https://github.com/substack/node-shell-quote
+
+Benchmarking:
+https://github.com/bestiejs/benchmark.js
