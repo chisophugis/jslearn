@@ -51,3 +51,6 @@ https://github.com/substack/node-shell-quote
 
 Benchmarking:
 https://github.com/bestiejs/benchmark.js
+
+Random sampling and shuffling:
+https://github.com/substack/node-deck
