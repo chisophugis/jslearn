@@ -54,3 +54,6 @@ https://github.com/bestiejs/benchmark.js
 
 Random sampling and shuffling:
 https://github.com/substack/node-deck
+
+Integrating semvers into your application:
+https://npmjs.org/package/semver
