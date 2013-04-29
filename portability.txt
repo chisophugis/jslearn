@@ -27,3 +27,7 @@ DataType.prototype.someMethod = function () {
 DataType.prototype._somePrivateMethod = function () {
   console.log('something');
 }
+
+
+// Generate some random hex digits.
+Math.random().toString(16).slice(2)
