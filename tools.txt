@@ -42,3 +42,36 @@ openssl s_client -connect imap.gmail.com:993
 # -T<file> --upload-file
 # -N --no-buffer (send data as it arrives)
 curl -NT- localhost 8080
+
+
+# -F --form <form-data>
+# send a POST containing a multipart file 'file' and 'file2'
+curl -F 'file=@/home/sean/bin/viq' \
+     -F 'file2=</home/sean/bin/viq' \
+     localhost:8000
+`@/file` puts the file in as multipart/form-data
+`</file` just substitutes sets the form parameter to the content of the file.
+
+# -d --data <data>
+# Sends <data> as the body of a POST, by default using
+# `Content-Type: application/x-www-form-urlencoded`.
+curl -d 'user[name]=sean' localhost:8000
+
+# -H --header 'Header: value'
+# Set a specific HTTP header.
+curl -d '{"user":{"name":"sean"}}' \
+     -H 'Content-Type: application/json' \
+     localhost:8000
+
+# -b --cookie 'name=val;name2=val2;...'
+curl -b 'foo=bar;baz=qux' localhost:8080
+
+# -u --user <user:pass> authenticate with basic HTTP authentication with
+# username `user` and password `pass`.
+curl -u user:pass localhost:8000
+Try doing:
+$ nc -l localhost 8000
+| sed -n -e 's/^Authorization: Basic \(.*\)$/\1/p'
+| base64 -di
+Then in a different window:
+$ curl -m1 -u sean:foo localhost:8000
