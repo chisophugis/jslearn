@@ -57,3 +57,8 @@ https://github.com/substack/node-deck
 
 Integrating semvers into your application:
 https://npmjs.org/package/semver
+
+Format bytes in a human-readable way, or convert human-readable to a
+number:
+https://github.com/visionmedia/bytes.js
+https://npmjs.org/package/bytes
