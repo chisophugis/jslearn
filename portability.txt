@@ -31,3 +31,14 @@ DataType.prototype._somePrivateMethod = function () {
 
 // Generate some random hex digits.
 Math.random().toString(16).slice(2)
+
+
+This the spacing is kind of weird for this, but after looking at it a bit
+it actually seems pretty readable. There's no "hanging indentation" in the
+condition that obscures the indent of the body.
+    if (buf && typeof buf === 'object'
+    && buf.constructor && buf.constructor.name === 'Buffer'
+    && buf.length
+    && typeof buf.slice === 'function') {
+        // treat like a buffer
+        if (!self._bufs) self._bufs = [];
