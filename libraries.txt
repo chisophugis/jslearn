@@ -62,3 +62,6 @@ Format bytes in a human-readable way, or convert human-readable to a
 number:
 https://github.com/visionmedia/bytes.js
 https://npmjs.org/package/bytes
+
+Get a monotonic timestamp:
+https://github.com/dominictarr/monotonic-timestamp
