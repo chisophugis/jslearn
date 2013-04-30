@@ -42,3 +42,11 @@ condition that obscures the indent of the body.
     && typeof buf.slice === 'function') {
         // treat like a buffer
         if (!self._bufs) self._bufs = [];
+
+
+
+This is basically like "a contains b". I find this really cryptic, but a
+lot of people use it, and I feel like I should write it down so that I
+don't forget it. It just has this "too clever" vibe that sets off my
+programmer alarms.
+~a.indexOf(b)
