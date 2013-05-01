@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <h1>Tweet results for <%= search %></h1>
+    <% if (results.length) { %>
+      <ul>
+        <% for (var i = 0, n = results.length; i !== n; ++i) { %>
+        <li><%= results[i].text %></li>
+        - <em><%= results[i].from_user %></em>
+        <img src="<%= results[i].profile_image_url %>" />
+        <% } %>
+      </ul>
+    <% } else { %>
+      <p>No results</p>
+    <% } %>
+  </body>
+</html>

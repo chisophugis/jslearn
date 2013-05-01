@@ -9,7 +9,10 @@
     "esprima": "~1.0.2",
     "optimist": "~0.3.7",
     "request": "~2.20.0",
-    "connect": "~2.7.6"
+    "connect": "~2.7.6",
+    "ejs": "~0.8.3",
+    "express": "~3.2.1",
+    "superagent": "~0.14.1"
   },
   "devDependencies": {},
   "scripts": {
