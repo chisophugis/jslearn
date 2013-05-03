@@ -12,7 +12,10 @@
     "connect": "~2.7.6",
     "ejs": "~0.8.3",
     "express": "~3.2.1",
-    "superagent": "~0.14.1"
+    "superagent": "~0.14.1",
+    "scuttlebutt": "~5.5.20",
+    "dnode": "~1.0.5",
+    "upnode": "~0.4.3"
   },
   "devDependencies": {},
   "scripts": {
