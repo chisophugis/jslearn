@@ -70,3 +70,6 @@ Handy to paper over browser/node; uses Buffer when available, falling back
 to Uint8Array:
 https://github.com/chrisdickinson/bops
 Used e.g. by https://github.com/chrisdickinson/inflate
+
+Like express, minus browsers.
+http://mcavage.github.io/node-restify/
