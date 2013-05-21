@@ -11,6 +11,7 @@ Option parsing:
 https://npmjs.org/package/commander
 https://npmjs.org/package/nopt
 https://npmjs.org/package/optimist
+https://github.com/harthur/nomnom
 
 
 Tar reader (fanatically maintained since npm depends on it):
