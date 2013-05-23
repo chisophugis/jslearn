@@ -77,3 +77,7 @@ http://mcavage.github.io/node-restify/
 
 Pretty full-features library for prompting users for info:
 https://github.com/flatiron/prompt
+
+A real "dictionary" for when you need to work around __proto__ and other
+nastiness.
+https://github.com/domenic/dict
