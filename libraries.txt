@@ -81,3 +81,13 @@ https://github.com/flatiron/prompt
 A real "dictionary" for when you need to work around __proto__ and other
 nastiness.
 https://github.com/domenic/dict
+
+Of course, esprima for all your parsing needs:
+https://github.com/ariya/esprima
+An alternative:
+https://github.com/marijnh/acorn
+Both use basically the same AST representation, so they are mostly
+interchangeable.
+
+Looks super legit for traversing JSON-like data structures:
+https://github.com/dherman/pattern-match
