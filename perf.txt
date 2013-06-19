@@ -1,0 +1,21 @@
+http://joyent.com/blog/linux-performance-analysis-and-tools-brendan-gregg-s-talk-at-scale-11x
+http://dtrace.org/blogs/brendan/2012/12/13/usenix-lisa-2012-performance-analysis-methodology/
+
+mpstat
+vmstat
+iostat
+netstat
+pidstat
+  trace processes doing IO
+    pidstat -d 1
+
+  -r is "record page faults and memory utilization"
+    pidstat -r 1 -C chrome | awk '$4 > 5000 && $9 == "chrome" { print $3 }'
+
+strace
+  for a quick summary
+    strace -c ./command
+
+ltrace
+
+lsof

@@ -1,0 +1,354 @@
+https://github.com/dominictarr/mux-demux
+
+Has been split up into multiple packages for alacarte consumption
+https://github.com/dominictarr/event-stream
+
+Insanely enlightened:
+https://github.com/dominictarr/pull-stream
+Yeah, wow, I just looked at this more closely, and it is intense.
+Incredibly simple; just plain functions!
+
+https://github.com/dominictarr/pull-through
+https://github.com/dominictarr/stream-to-pull-stream
+
+This also looks intense:
+https://github.com/Gozala/reducers
+
+https://github.com/substack/emit-stream
+
+Really interesting idea:
+https://github.com/dominictarr/regular-stream
+
+I need to grok this stuff:
+https://github.com/dominictarr/scuttlebutt
+https://github.com/dominictarr/r-value
+https://github.com/dominictarr/crdt
+https://github.com/dominictarr/between
+https://github.com/Raynos/append-only
+
+https://github.com/dominictarr/presentations
+------
+  # So...
+
+  Duplo = Commutativily + Streams
+
+    Streams = standard connectors
+
+    Commutativity = sturdyness, reliability.
+
+------
+
+  # types of streams
+
+    * one way: readable || writable
+      ** readable
+      ** writeable
+
+    * two way: writable && readable
+      ** through / filter
+      ** duplex
+
+  # Through vs. Duplex
+
+    * Through is like a meat-grinder.
+      (meat goes in, sausage comes out)
+
+    * Duplex is like a telephone.
+      (two entities communicate)
+
+  # Through, illustrated
+  ```
+    user--,
+          |
+          v
+   ,-------------------.
+   |   write(), end()  |
+   |                   |
+   |emits 'end', 'data'|
+   `-------------------`
+          |
+          |
+    user<-/
+  ```
+  # Duplex, Illustrated.
+  ```
+                                 ///////////////////////
+                                 |                     |
+               ,--------------------,                  |
+               |                    |                  |
+  user ------->| write(), end() ======>   S O M E      |
+               |                    |                  |
+               |                    |     T H I N G    |
+  user <-------|emits 'data', 'end' <==                |
+               |                    |     E L S E      |
+               `--------------------`                  |
+                                 |                     |
+                                 |                     |
+                                 \\\\\\\\\\\\\\\\\\\\\\!
+------
+  # Never do this
+
+  ``` js
+  through.pipe(through2).pipe(through)
+  ```
+
+https://github.com/dominictarr/JSONStream
+https://github.com/dominictarr/event-stream
+https://github.com/dominictarr/pull-stream
+https://github.com/substack/stream-handbook
+https://github.com/dominictarr/streams-workshop
+
+https://github.com/chrisdickinson/inflate
+https://github.com/dominictarr/between
+https://npmjs.org/package/scuttlebutt
+http://www.erlang.org/doc/man/gen_fsm.html
+http://www.erlang.org/doc/design_principles/fsm.html
+https://npmjs.org/package/crdt
+
+
+
+https://github.com/maxogden/node-concat-stream
+
+
+# http://research.microsoft.com/en-us/um/people/lamport/pubs/time-clocks.pdf
+
+A system is distributed if the message transmission delay is not negligible
+compared to the time between events in a single process.
+
+Definition. The relation "-->" on the set of events of a system is the
+smallest relation satisfying the following three conditions:
+(1) If a and b are events in the same process, and a comes before b, then
+    a --> b.
+(2) If a is the sending of a message by one process and b is the receipt
+    of the same message by another process, then a --> b.
+(3) If a --> b and b --> c then a --> c. Two distinct events a and b are
+    said to be concurrent if a -/-> b and b -/-> a.
+We assume that a -/-> a for any event a. (Systems in which an event can
+happen before itself do not seem to be physically meaningful.) This implies
+that --> is an irreflexive partial ordering on the set of all events in the
+system.
+
+
+It is helpful to view this definition in terms of a
+space-time diagram" such as Figure 1. The horizontal
+direction represents space, and the vertical direction
+represents time--later times being higher than earlier
+ones. The dots denote events, the vertical lines denote
+processes, and the wavy lines denote messages. It is easy
+to see that a --> b means that one can go from a to b in
+the diagram by moving forward in time along process
+and message lines. For example, we have p1 --> r4 in
+Figure 1.
+
+Two events are concurrent if neither can
+causally affect the other.
+
+We now introduce clocks into the system. We begin with an abstract point of
+view in which a clock is just a way of assigning a number to an event,
+where the number is thought of as the time at which the event occurred.
+More precisely, we define a clock C_i for each process P_i to be a function
+which assigns a number C_i(a) to any event a in that process. The entire
+system of clocks is represented by the function C which assigns to any event
+b the number C(b), where C(b) = C_j(b) if b is an event in process P_j. For
+now, we make no assumption about the relation of the numbers C_i(a) to
+physical time, so we can think of the clocks C_i as logical rather than
+physical clocks. They may be implemented by counters with no actual timing
+mechanism.
+
+Clock Condition. For any events a, b:
+                            if a --> b then C(a) < C(b).
+
+It is easy to see from our definition of the relation
+"-->" that the Clock Condition is satisfied if the following
+two conditions hold.
+
+  C1.  If a and b are events in process P_i, and a comes
+  before b, then C_i(a) < C_i(b).
+
+  C2. If a is the sending of a message by process P_i and b
+  is the receipt of that message by process P_i, then C_i(a)
+  < C_i(b)
+
+To guarantee that the system of clocks satisfies the
+Clock Condition, we will insure that it satisfies conditions
+C1 and C2. Condition C1 is simple; the processes need
+only obey the following implementation rule:
+
+IR1. Each process P_i increments C_i between any
+two successive events.
+
+To meet condition C2, we require that each message
+m contain a timestamp T_m which equals the time at which
+the message was sent. Upon receiving a message time-stamped
+T_m, a process must advance its clock to be later
+than T_m. More precisely, we have the following rule.
+
+IR2.
+(a) If event a is the sending of a message m
+by process P_i, then the message m contains a timestamp
+T_m= C_i(a).
+(b) Upon receiving a message m, process
+P_i sets C_i greater than or equal to its present value and
+greater than T_m.
+
+In IR2(b) we consider the event which represents the
+receipt of the message m to occur after the setting of C i.
+(This is just a notational nuisance, and is irrelevant in
+any actual implementation.) Obviously, IR2 insures that
+C2 is satisfied. Hence, the simple implementation rules
+IR1 and IR2 imply that the Clock Condition is satisfied,
+so they guarantee a correct system of logical clocks.
+
+We can use a system of clocks satisfying the Clock
+Condition to place a total ordering on the set of all
+system events. We simply order the events by the times
+at which they occur. To break ties, we use any arbitrary
+total ordering < of the processes. More precisely, we
+define a relation ==> as follows: if a is an event in
+process P_i and b is an event in process P_j, then a ==>
+b if and only if either (i) C_i(a) < C_j(b) or (ii) C_i(a)
+== C_j(b) and P_i < P_j. It is easy to see that this
+defines a total ordering, and that the Clock Condition
+implies that if a --> b then a ==> b. In other words, the
+relation ==> is a way of completing the "happened before"
+partial ordering to a total ordering.
+
+In a distributed system, it is important to realize that
+the order in which events occur is only a partial ordering.
+We believe that this idea is useful in understanding any
+multiprocess system. It should help one to understand
+the basic problems of multiprocessing independently of
+the mechanisms used to solve them.
+
+
+http://www.cs.cornell.edu/home/rvr/papers/flowgossip.pdf
+
+
+There is a set P of participants. Each participant p in P has a set of
+peers F_p (subset of P - {p}).
+Each participant's _state_ is a mapping s of key->(value,version#).
+
+Each participant p has a mapping m_p that maps from participants to their
+state (a key->(value,version#) mapping) keeping track of their knowledge of
+the system. A participant can only directly update m_p(p)
+(i.e., their own state mapping), and must update m_p(q) (q !== p) by
+gossiping.
+Let + be an operator ("merge" or "reconciliation") that merges two states
+so that if a key is present in both mappings, then the (value,version#) of
+the resulting mapping is the one with the higher version number.
+
+There are three basic styles of gossip:
+Let p and q be distinct participants.
+
+1. push-gossip: p sends its mapping m_p to q, and then q updates its state
+to be `m_p + m_q` (it was previously m_q). That is, for each r in the set
+of participants, set `m'_q(r) := m_p(r) + m_q(r)`.
+2. pull-gossip: p sends just its keys and version numbers to q (a so-called
+"digest"), and then q replies with the necessary updates to p's mapping.
+Thus p's mapping is replaced by `m_p + m_q`.
+3. push-pull gossip: Basically it is just like pull-gossip, except that q's
+reply also contains a digest of it's own, and p replies with the necessary
+updates. So it is basically two pipelined applications of pull-gossip.
+
+
+"scuttlebutt" refers to a reconciliation algorithm. I.e., how to choose
+which information should be transferred when two participants gossip with
+each other.
+
+First, when two participants start gossiping, they exchange digests
+containing the latest version number that they know about for all the
+participants that they know about. Then, when they exchange deltas
+(r,k,v,n), only deltas with n greater than the other participant's max
+version number for participant r are exchanged. If the complete set of such
+deltas is bigger than the MTU, then priority is given to lower-numbered
+deltas.
+This produces the global invariant (for any two processes p and q):
+m_p(p)[k] = m_q(p)[k] or m_p(p)[k].n > max(m_q(p))
+In other words, either q's knowledge of p is up to date, or the version
+number of any out of date key is greater than the maximum version number
+that q has heard about from p (for any key). From this invariant, it is
+easy to see that
+max(m_q(p)) === max(m_p(p)) implies that m_q(p) === m_p(p)
+In other words, if the maximum version number that q has heard about from p
+is equal to the maximum version number that p knows about itself (which is
+the "truth"), then both of their mappings are identical and up to date.
+
+
+http://www.read.seas.harvard.edu/~kohler/class/cs239-w08/decandia07dynamo.pdf
+
+The architecture of a storage system that needs to operate in a
+production setting is complex. In addition to the actual data
+persistence component, the system needs to have scalable and
+robust solutions for load balancing, membership and failure
+detection, failure recovery, replica synchronization, overload
+handling, state transfer, concurrency and job scheduling, request
+marshalling, request routing, system monitoring and alarming,
+and configuration management.
+
+A possible issue with vector clocks is that the size of vector
+clocks may grow if many servers coordinate the writes to an
+object. In practice, this is not likely because the writes are usually
+handled by one of the top N nodes in the preference list. In case of
+network partitions or multiple server failures, write requests may
+be handled by nodes that are not in the top N nodes in the
+preference list causing the size of vector clock to grow. In these
+scenarios, it is desirable to limit the size of vector clock. To this
+end, Dynamo employs the following clock truncation scheme:
+Along with each (node, counter) pair, Dynamo stores a timestamp
+that indicates the last time the node updated the data item. When
+the number of (node, counter) pairs in the vector clock reaches a
+threshold (say 10), the oldest pair is removed from the clock.
+Clearly, this truncation scheme can lead to inefficiencies in
+reconciliation as the descendant relationships cannot be derived
+accurately. However, this problem has not surfaced in production
+and therefore this issue has not been thoroughly investigated.
+
+# This is what git uses.
+# These are a good fit for anti-entropy (i.e. gossip) protocols.
+A Merkle tree is a hash tree where leaves are hashes of
+the values of individual keys. Parent nodes higher in the tree are
+hashes of their respective children.
+The principal advantage of Merkle tree is that each branch of the tree can
+be checked independently without requiring nodes to download the entire
+tree or the entire data set.
+
+
+
+
+When to use streams vs. event emitters:
+https://github.com/dominictarr/stream-punks/issues/4
+
+@dominictarr:
+if these things, it's a stream:
+
+* you get a series (0 or more) things occur, and then they stop.
+* it's useful to have some of these things, before you have received them
+  all (i.e., you don't need the end of the video to watch the start. things
+  like an html template, doesn't really need to stream)
+* it's beneficial to think about your module with some sort of assembly
+  line, or communication metaphore.
+* your module must communicate with other modules.
+* the messages/data you are sending are SERIALIZEABLE
+
+in a way, streams are standardized glue code. You want to avoid using event
+emitters, and just writing an adhoc stream, because Stream is already good
+at that.... and a HUGE amount of work has gone into getting it right.
+
+On the other hand, there is still plenty of cases where you want to use
+event-emitters.  for example, it would be pretty silly to have a stream of
+streams, like a server is an event-emitter, and it emits streams on a
+'connection' event. (as does mux-demux)
+
+The connections to a server are in a series, but they are independant,
+their order doesn't mean anything.  In a stream, the order is (usually)
+significant.
+
+@isaacs
+The core feature of streams is back-pressure. If the output of one thing is
+the input of another, and the output should not come faster than the input
+can consume it, then you need some way to communicate this. That's what TCP
+got right, and it's what the Stream interface is for. That's why it's such
+a good fit for the "you don't need the end to process the beginning"
+use-case. For example, the video might not all fit in memory, so
+downloading the whole thing might not even make sense. What you want to do
+is show the part you have, then get another part.
