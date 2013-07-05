@@ -91,3 +91,7 @@ interchangeable.
 
 Looks super legit for traversing JSON-like data structures:
 https://github.com/dherman/pattern-match
+
+Simple "keybindings" and other stuff for interactive media applications in
+a browser:
+https://github.com/mikolalysenko/game-shell
