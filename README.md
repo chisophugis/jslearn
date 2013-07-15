@@ -1,1 +1,1 @@
-JS code. Me messing around.
+JS code. Me messing around. Notes.
