@@ -1,0 +1,11 @@
+This idea of "continuables" is really brilliant:
+https://github.com/Raynos/continuable
+https://github.com/Raynos/continuable/blob/master/spec.md
+
+It basically has all the benefits of a promise (i.e. that it is a concrete
+value that can be passed around, and that abstractions can be built on
+that), while still retaining the simplicity of callbacks.
+
+For example, they can be composed sequentially and in parallel.
+https://github.com/dominictarr/continuable-series
+https://github.com/dominictarr/continuable-para
