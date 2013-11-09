@@ -1,0 +1,2 @@
+Useful for indicating package stability:
+https://github.com/hughsk/stability-badges

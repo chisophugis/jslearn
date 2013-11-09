@@ -12,6 +12,8 @@ https://npmjs.org/package/commander
 https://npmjs.org/package/nopt
 https://npmjs.org/package/optimist
 https://github.com/harthur/nomnom
+# My experience: optimist is the most practical. Trivial to start using it
+# in an ad-hoc fashion and then later formalize the arguments more.
 
 
 Tar reader (fanatically maintained since npm depends on it):
@@ -95,3 +97,32 @@ https://github.com/dherman/pattern-match
 Simple "keybindings" and other stuff for interactive media applications in
 a browser:
 https://github.com/mikolalysenko/game-shell
+
+Better "bind" and related functionality:
+https://github.com/substack/node-ap
+
+General graph stuff:
+https://github.com/cpettitt/graphlib
+
+Lightweight replacement for `request`. Works with browserify.
+https://npmjs.org/package/hyperquest
+
+Multi-dimensional arrays
+https://github.com/mikolalysenko/ndarray
+https://github.com/mikolalysenko/cwise
+https://github.com/mikolalysenko/ndarray-ops
+https://github.com/mikolalysenko/webglew
+Check out other stuff by Mikola Lysenko; he has some legit modules.
+Especially stuff relevant to game programming (e.g. webgl stuff).
+https://github.com/mikolalysenko/gl-now
+Looks like a good building-block-based tutorial for webgl:
+https://github.com/mikolalysenko/gl-modules
+
+https://github.com/mikolalysenko/bit-twiddle
+
+Sane templating:
+https://github.com/substack/hyperglue
+https://github.com/substack/hyperspace
+
+YAML parsing
+https://github.com/nodeca/js-yaml
