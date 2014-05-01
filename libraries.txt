@@ -126,3 +126,6 @@ https://github.com/substack/hyperspace
 
 YAML parsing
 https://github.com/nodeca/js-yaml
+
+Seems good for client-side webapps (used by the gitbook editor):
+https://friendco.de/hr.js/
